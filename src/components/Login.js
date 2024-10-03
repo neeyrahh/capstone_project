@@ -11,7 +11,7 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch, // Import watch here
+    watch, // Import w here
   } = useForm();
 
   // Toggle between login and signup forms
