@@ -41,7 +41,7 @@ const Login = () => {
 
         <div className="form-content">
           {isLogin ? (
-            // Login Form from sushma
+            // Login Form from sushmab
             <form
               onSubmit={handleSubmit(onSubmit)}
               className={`form-signin ${!isLogin ? 'form-signin-left' : ''} needs-validation`}
