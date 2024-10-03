@@ -4,9 +4,8 @@ import Login from "./components/Login";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Body from "./components/Body";
 import Tasks from "./components/Tasks";
+import TaskDetails from "./components/TaskDetails";  // Import TaskDetails component
 import Homepage from "./components/Homepage";
-
-
 
 const router = createBrowserRouter([
   {
@@ -19,25 +18,16 @@ const router = createBrowserRouter([
       },
       {
         path:"/tasks",
-        element: <Tasks/>,
+        element: <Tasks />,
+      },
+      {
+        path: "/task/:cardId",  // Add the route for Task Details
+        element: <TaskDetails />,
       },
       {
         path: "/login",
         element:<Login/> ,
       },
-    
-      // {
-      //   path:,
-      //   element: ,
-      // },
-      // {
-      //   path: ,
-      //   element:,
-      // },
-      // {
-      //   path: ,
-      //   element: ,
-      // },
       {
         path: "*",
         element: <p>404 Page Not Found</p>,
