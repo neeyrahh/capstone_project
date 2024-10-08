@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import '../styles/Styles.css';
 import { Container, Nav, Navbar } from "react-bootstrap";
 
 const Header = () => {
@@ -12,7 +13,7 @@ const Header = () => {
   ];
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
+    <Navbar className = "header" variant="dark" expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">
           TrackIt

@@ -1,9 +1,10 @@
 import React from "react";
+import '../styles/Styles.css';
 import { Container } from "react-bootstrap";
 
 const Footer = () => {
   return (
-    <footer className="bg-dark text-white py-3 mt-auto">
+    <footer>
       <Container>
         <p className="mb-0 text-center">
           TrackIt &copy; 2024

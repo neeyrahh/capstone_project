@@ -1,0 +1,287 @@
+/* Import Google Font */
+@import url("https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap");
+
+/* Root Variables */
+:root {
+  --primary-dark: #03061f;
+  --primary-dark-alt: #1a2793;
+  --primary-default: #3d53db;
+  --primary-light: #bac8ff;
+  --primary-light2: #f1f1f1;
+  --green: #2a3bb7;
+  --white: #ffffff;
+  --grey-light: #fcfcfc;
+  --grey-dark: #131313;
+
+  /* Font Settings */
+  --font-family: "Lexend Deca", sans-serif;
+  --font-size-small: 12px;
+  --font-size-regular: 14px;
+  --font-size-medium: 16px;
+  --font-size-large: 20px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Button Styles */
+  --button-bg-primary: var(--green);
+  --button-bg-secondary: var(--primary-dark);
+  --button-text-color: var(--white);
+  --button-border-radius: 4px;
+  --button-padding: 10px 40px;
+  --button-font-size: var(--font-size-medium);
+
+  /* Form Field Styles */
+  --input-border-radius: 4px;
+  --input-padding: 15px;
+  --input-background: #f3f4f6;
+  --input-border-color: var(--grey-light);
+  --input-focus-border-color: var(--green);
+
+  /* Shadows */
+  --shadow-light: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0px 6px 15px rgba(0, 0, 0, 0.2);
+
+  /* Spacing */
+  --spacing-small: 8px;
+  --spacing-medium: 16px;
+  --spacing-large: 24px;
+}
+
+/* Header Styles */
+.header {
+  background-color: var(--primary-dark);
+  color: var(--white) !important;
+}
+
+.header .nav-link {
+  color: var(--white) !important;
+}
+
+.header .navbar-brand {
+  color: var(--white);
+}
+
+/* Global Styles */
+body {
+  background-color: var(--grey-light);
+}
+
+body,input,button,label,
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--font-family);
+}
+
+.form-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 85vh;
+}
+
+.welcome-back-section {
+  background-color: var(--primary-dark);
+  color: var(--white);
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* text-align: center; */
+}
+
+.form {
+  margin-top: 1.5rem;
+}
+
+.form-section {
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+label {
+  white-space: nowrap;
+    width: 100%;
+    padding-bottom: 0.40rem;
+}
+
+input {
+  width: 60%; /* Adjust width of input field */
+}
+
+input {
+  padding: var(--input-padding);
+  border-radius: var(--input-border-radius);
+  border: 1px solid var(--grey-light);
+  margin-bottom: 15px;
+}
+
+.mandatory {
+  color: red;
+  margin-left: 5px;
+}
+
+/* Error message styling */
+.invalid-feedback {
+  color: red;
+  font-size: 12px;
+  display: inline-block; /* Display inline next to the label */
+  margin-left: 10px; /* Space between label and error message */
+  vertical-align: middle; /* Align error message with label */
+}
+
+.hidden {
+  display: none;
+}
+
+.social-login a {
+  margin: 0 10px;
+}
+
+
+/* Social Icons */
+.social-icons {
+  display: flex;
+  justify-content: center;
+  margin: var(--spacing-medium) 0;
+}
+
+.social-icons a {
+  color: var(--primary-dark);
+  margin: 0 10px;
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: var(--green);
+}
+
+/* Form and button styling */
+.signin-active a,
+.signup-active a {
+  color: #ffffff;
+  text-decoration: none;
+  border-bottom: solid 2px #1059ff;
+  padding-bottom: 10px;
+}
+
+.signin-inactive a,
+.signup-inactive a {
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: var(--input-padding);
+  background-color: var(--primary-light2);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  margin-bottom: var(--spacing-medium);
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: var(--input-focus-border-color);
+  outline: none;
+}
+
+.form-signin,
+.form-signup {
+  width: 430px;
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  padding-left: 37px;
+  padding-right: 37px;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Button styles */
+button {
+  padding: 10px 20px;
+  border-radius: var(--button-border-radius);
+  margin-top: 1rem;
+}
+
+button.btn {
+  width: -webkit-fill-available;
+  /* border: none;
+    outline: none; */
+}
+
+
+.btn {
+  display: inline-block;
+  color: var(--button-text-color);
+  background-color: var(--button-bg-primary);
+  border-radius: var(--button-border-radius);
+  padding: var(--button-padding);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  color: var(--input-background);
+  background-color: var(--primary-dark-alt);
+}
+
+button .btn:hover {
+  color: var(--input-background);
+  background-color: var(--primary-dark-alt);
+}
+
+
+/* Responsive section */
+@media only screen and (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .frame {
+    width: 100%;
+    height: auto;
+  }
+
+  .nav {
+    height: auto;
+  }
+
+  .form-signin,
+  .form-signup {
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Additional Elements */
+.forgot {
+  height: 100px;
+  text-align: center;
+  margin-top: -535px;
+  transition: all 0.5s ease;
+}
+
+.forgot-left {
+  transform: translateX(-400px);
+  opacity: 0;
+}
+
+/* Footer Styles */
+footer {
+  background-color: var(--primary-dark);
+  color: var(--grey-light);
+  padding: 20px 0;
+}
+
+footer p {
+  margin-bottom: 0;
+  color: var(--white);
+}
