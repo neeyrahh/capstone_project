@@ -1,143 +1,249 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../styles/Login.css';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/Styles.css";
 
-const Login = () => {
-  const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup forms
-
-  // React Hook Form setup for form validation
+const LoginSignup = () => {
+  const [isLogin, setIsLogin] = useState(true);
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch, // Import watch here
-  } = useForm();
+    watch,
+    reset,
+  } = useForm({
+    mode: "onSubmit", // Makes sure validation is triggered on submit
+  });
 
-  // Toggle between login and signup forms
+  // Toggle between login and sign up forms
   const toggleForms = () => {
     setIsLogin(!isLogin);
+    reset(); // Reset form fields when switching
   };
 
-  // Placeholder for form submission logic
+  // Placeholder for form submission logic (Sign Up and Login)
   const onSubmit = (data) => {
-    console.log('Form data submitted:', data);
-    // Add API call or other logic here
+    console.log("Form data submitted:", data);
+    if (!isLogin) {
+      toggleForms();
+    }
+    // Add API call or other logic here for both Sign Up and Login
   };
 
   return (
-    <div className="container">
-      <div className={`frame ${!isLogin ? 'frame-long' : 'frame-short'}`}>
-        <div className="nav">
-          <ul className="links">
-            <li className={isLogin ? 'signin-active' : 'signin-inactive'}>
-              <button className="btn btn-primary1" onClick={toggleForms}>Login</button>
-            </li>
-            <li className={!isLogin ? 'signup-active' : 'signup-inactive'}>
-              <button className="btn btn-secondary" onClick={toggleForms}>Sign Up</button>
-            </li>
-          </ul>
+    <div className="form-container">
+      <div className="row">
+        {/* Left Side */}
+        <div className="col-md-6 welcome-back-section">
+          <h2>
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+          </h2>
+          <p>
+            {isLogin
+              ? "Click Sign Up to create your account"
+              : "Click Login to access your account"}
+          </p>
+          <button className="btn btn-primary" onClick={toggleForms}>
+            {isLogin ? "Sign Up" : "Login"}
+          </button>
         </div>
 
-        <div className="form-content">
+        {/* Right Side */}
+        <div className="col-md-6 form-section">
           {isLogin ? (
-            // Login Form from sushmab
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className={`form-signin ${!isLogin ? 'form-signin-left' : ''} needs-validation`}
-              noValidate
-            >
-              <div className="form-group">
-                <label htmlFor="username">Username</label>
-                <input
-                  className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                  type="text"
-                  name="username"
-                  {...register('username', { required: 'Username is required' })}
-                  placeholder="Enter your username"
-                />
-                {errors.username && <div className="invalid-feedback">{errors.username.message}</div>}
+            // Login Form
+            <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+              <h2>Login</h2>
+              <div className="form">
+                <div className="form-group">
+                  <label htmlFor="username">
+                    Username
+                    {errors.username ? (
+                      <span className="invalid-feedback">
+                        {errors.username.message}
+                      </span>
+                    ) : (
+                      <span className="mandatory">*</span>
+                    )}
+                  </label>
+                  <input
+                    className={`form-control ${
+                      errors.username ? "is-invalid" : ""
+                    }`}
+                    type="text"
+                    name="username"
+                    {...register("username", {
+                      required: "Username is required",
+                    })}
+                    placeholder="Enter your username"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="email">
+                    Email
+                    {errors.email ? (
+                      <span className="invalid-feedback">
+                        {errors.email.message}
+                      </span>
+                    ) : (
+                      <span className="mandatory">*</span>
+                    )}
+                  </label>
+                  <input
+                    className={`form-control ${
+                      errors.email ? "is-invalid" : ""
+                    }`}
+                    type="email"
+                    name="email"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                        message: "Invalid email format",
+                      },
+                    })}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="password">
+                    Password
+                    {errors.password ? (
+                      <span className="invalid-feedback">
+                        {errors.password.message}
+                      </span>
+                    ) : (
+                      <span className="mandatory">*</span>
+                    )}
+                  </label>
+                  <input
+                    className={`form-control ${
+                      errors.password ? "is-invalid" : ""
+                    }`}
+                    type="password"
+                    name="password"
+                    {...register("password", {
+                      required: "Password is required",
+                      minLength: 8,
+                    })}
+                    placeholder="Enter your password"
+                  />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <input
-                  className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                  type="password"
-                  name="password"
-                  {...register('password', { required: 'Password is required', minLength: 8 })}
-                  placeholder="Enter your password"
-                />
-                {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
-              </div>
-
-              <button type="submit" className="btn btn-success btn-block mt-4">Login</button>
+              <button type="submit" className="btn btn-primary">
+                Login
+              </button>
             </form>
           ) : (
             // Sign Up Form
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className={`form-signup ${isLogin ? 'form-signup-left' : ''} needs-validation`}
-              noValidate
-            >
+            <form onSubmit={handleSubmit(onSubmit)} className="signup-form">
+              <h2>Sign Up</h2>
+              <div className="form">
               <div className="form-group">
-                <label htmlFor="fullname">Full Name</label>
+                <label htmlFor="fullname">
+                  Full Name
+                  {errors.fullname ? (
+                    <span className="invalid-feedback">
+                      {errors.fullname.message}
+                    </span>
+                  ) : (
+                    <span className="mandatory">*</span>
+                  )}
+                </label>
                 <input
-                  className={`form-control ${errors.fullname ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.fullname ? "is-invalid" : ""
+                  }`}
                   type="text"
                   name="fullname"
-                  {...register('fullname', { required: 'Full name is required' })}
+                  {...register("fullname", {
+                    required: "Full name is required",
+                  })}
                   placeholder="Enter your full name"
                 />
-                {errors.fullname && <div className="invalid-feedback">{errors.fullname.message}</div>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">
+                  Email
+                  {errors.email ? (
+                    <span className="invalid-feedback">
+                      {errors.email.message}
+                    </span>
+                  ) : (
+                    <span className="mandatory">*</span>
+                  )}
+                </label>
                 <input
-                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
                   type="email"
                   name="email"
-                  {...register('email', {
-                    required: 'Email is required',
+                  {...register("email", {
+                    required: "Email is required",
                     pattern: {
                       value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-                      message: 'Invalid email format',
+                      message: "Invalid email format",
                     },
                   })}
                   placeholder="Enter your email"
                 />
-                {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">
+                  Password
+                  {errors.password ? (
+                    <span className="invalid-feedback">
+                      {errors.password.message}
+                    </span>
+                  ) : (
+                    <span className="mandatory">*</span>
+                  )}
+                </label>
                 <input
-                  className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.password ? "is-invalid" : ""
+                  }`}
                   type="password"
                   name="password"
-                  {...register('password', { required: 'Password is required', minLength: 8 })}
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: 8,
+                  })}
                   placeholder="Enter your password"
                 />
-                {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="confirmpassword">Confirm Password</label>
+                <label htmlFor="confirmpassword">
+                  Confirm Password
+                  {errors.confirmpassword ? (
+                    <span className="invalid-feedback">
+                      {errors.confirmpassword.message}
+                    </span>
+                  ) : (
+                    <span className="mandatory">*</span>
+                  )}
+                </label>
                 <input
-                  className={`form-control ${errors.confirmpassword ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.confirmpassword ? "is-invalid" : ""
+                  }`}
                   type="password"
                   name="confirmpassword"
-                  {...register('confirmpassword', {
-                    required: 'Confirm password is required',
-                    validate: (value) => value === watch('password') || 'Passwords do not match',
+                  {...register("confirmpassword", {
+                    required: "Confirm password is required",
+                    validate: (value) =>
+                      value === watch("password") || "Passwords do not match",
                   })}
                   placeholder="Confirm your password"
                 />
-                {errors.confirmpassword && <div className="invalid-feedback">{errors.confirmpassword.message}</div>}
               </div>
-
-              <button type="submit" className="btn btn-success btn-block mt-4">Sign Up</button>
+              </div>
+              <button type="submit" className="btn">
+                Sign Up
+              </button>
             </form>
           )}
         </div>
@@ -146,4 +252,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginSignup;
