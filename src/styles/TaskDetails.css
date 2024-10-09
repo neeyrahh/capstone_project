@@ -1,0 +1,102 @@
+/* TaskDetails.css */
+
+.task-details-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f4f5f7;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .task-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #172b4d;
+  }
+  
+  .task-section {
+    margin-bottom: 20px;
+  }
+  
+  .task-section-title {
+    font-weight: bold;
+    color: #5e6c84;
+    margin-bottom: 10px;
+  }
+  
+  .task-section-content {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .task-section-content p {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .label {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 3px;
+    color: white;
+    margin-right: 10px;
+    background-color: #5aac44; 
+  }
+  
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .checklist-checkbox {
+    margin-right: 10px;
+  }
+  
+  .progress-bar-container {
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 10px;
+    margin-top: 5px;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background-color: #5aac44;
+  }
+  
+  .task-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .button-primary {
+    background-color: #0079bf;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .button-danger {
+    background-color: #eb5a46;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+  }
+  

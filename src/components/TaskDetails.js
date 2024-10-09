@@ -1,43 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Container } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import '../styles/TaskDetails.css';
 
-
+// Mock data for task details
 const mockTasks = [
   {
     CardID: 1,
-    Title: 'Task 1',
-    Description: 'This is the description of Task 1.',
+    Title: 'Implement Task Details Screen',
+    Description: 'Create the Task Details screen where users can view more information.',
     Priority: 'High',
-    AssignedTo: 'Azhar',
+    AssignedTo: 'Naznin',
     DueDate: '2024-10-05',
-    Status: 'To Do'
+    Status: 'In Progress',
+    Checklist: [
+      { id: 1, text: 'Implement the design in React', completed: true },
+      { id: 2, text: 'Add buttons for actions like "Edit Task" and "Delete Task"', completed: true },
+      { id: 3, text: 'Test the responsiveness', completed: false },
+      { id: 4, text: 'Collaborate with the backend team', completed: false }
+    ]
   },
-  {
-    CardID: 2,
-    Title: 'Task 2',
-    Description: 'This is the description of Task 2.',
-    Priority: 'Medium',
-    AssignedTo: 'Arthur',
-    DueDate: '2024-10-10',
-    Status: 'To Do'
-  },
-  {
-    CardID: 3,
-    Title: 'Task 3',
-    Description: 'This is the description of Task 3.',
-    Priority: 'Low',
-    AssignedTo: 'Adyl',
-    DueDate: '2024-10-07',
-    Status: 'In Progress'
-  }
 ];
 
 const TaskDetails = () => {
-  const { cardId } = useParams();  
+  const { cardId } = useParams();
   const [task, setTask] = useState(null);
 
-  
   useEffect(() => {
     const selectedTask = mockTasks.find(task => task.CardID === parseInt(cardId));
     setTask(selectedTask);
@@ -47,23 +34,50 @@ const TaskDetails = () => {
     return <div>Loading...</div>;
   }
 
+  const completedItems = task.Checklist.filter(item => item.completed).length;
+  const progress = (completedItems / task.Checklist.length) * 100;
+
   return (
-    <Container className="my-4">
-      <Card className="shadow-sm">
-        <Card.Body>
-          <Card.Title>{task.Title}</Card.Title>
-          <Card.Text>
-            <strong>Description:</strong> {task.Description}<br />
-            <strong>Priority:</strong> {task.Priority}<br />
-            <strong>Assigned to:</strong> {task.AssignedTo}<br />
-            <strong>Due Date:</strong> {task.DueDate}<br />
-            <strong>Status:</strong> {task.Status}
-          </Card.Text>
-          <Button variant="primary" className="me-2">Edit Task</Button>
-          <Button variant="danger">Delete Task</Button>
-        </Card.Body>
-      </Card>
-    </Container>
+    <div className="task-details-container">
+      <h1 className="task-title">{task.Title}</h1>
+      
+      <div className="task-section">
+        <h3 className="task-section-title">Description</h3>
+        <div className="task-section-content">
+          <p>{task.Description}</p>
+        </div>
+      </div>
+      
+      <div className="task-section">
+        <h3 className="task-section-title">Details</h3>
+        <div className="task-section-content">
+          <p><strong>Assigned To:</strong> {task.AssignedTo}</p>
+          <p><strong>Due Date:</strong> {task.DueDate}</p>
+          <p><strong>Status:</strong> <span className="label">{task.Status}</span></p>
+          <p><strong>Priority:</strong> <span className="label">{task.Priority}</span></p>
+        </div>
+      </div>
+
+      <div className="task-section">
+        <h3 className="task-section-title">Checklist</h3>
+        <div className="task-section-content">
+          {task.Checklist.map(item => (
+            <div key={item.id} className="checklist-item">
+              <input type="checkbox" className="checklist-checkbox" checked={item.completed} readOnly />
+              <span>{item.text}</span>
+            </div>
+          ))}
+          <div className="progress-bar-container">
+            <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="task-actions">
+        <button className="button-primary">Edit Task</button>
+        <button className="button-danger">Delete Task</button>
+      </div>
+    </div>
   );
 };
 
