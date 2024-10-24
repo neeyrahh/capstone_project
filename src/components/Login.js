@@ -134,6 +134,7 @@ const LoginSignup = () => {
               <button type="submit" className="btn btn-primary">
                 Login
               </button>
+              <span>Did you forget your password? <a href="./forget-password">Click Here</a></span>
             </form>
           ) : (
             // Sign Up Form

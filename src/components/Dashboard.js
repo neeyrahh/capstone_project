@@ -12,7 +12,7 @@ const data = [
 
 ];
 
-const Homepage = () => {
+const Dashboard = () => {
   // const { loading, error, data } = useEmployeeData();
 
   // if (loading) {
@@ -125,4 +125,4 @@ const Homepage = () => {
   );
 };
 
-export default Homepage;
+export default Dashboard;

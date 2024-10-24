@@ -6,6 +6,7 @@ import { Container, Nav, Navbar } from "react-bootstrap";
 const Header = () => {
   const headerLinks = [
     { link: "/", text: "Home" },
+    { link: "/dashboard", text: "Dashboard" },
     { link:"/tasks", text:"Tasks" },
     { link:"/login", text:"Login"},
     
