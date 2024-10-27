@@ -1,185 +1,127 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import Confetti from "react-confetti"; 
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../styles/Styles.css";
+import { useAuth } from './Auth/AuthContext';
+
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [confetti, setConfetti] = useState(false); 
+  const { login } = useAuth(); 
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
     reset,
-  } = useForm({
-    mode: "onSubmit", // Makes sure validation is triggered on submit
-  });
+  } = useForm({ mode: "onSubmit" });
 
-  // Toggle between login and sign up forms
+  // Toggle between login and sign-up forms
   const toggleForms = () => {
     setIsLogin(!isLogin);
-    reset(); // Reset form fields when switching
+    reset(); 
   };
 
-  // Placeholder for form submission logic (Sign Up and Login)
-  const onSubmit = (data) => {
-    console.log("Form data submitted:", data);
-    if (!isLogin) {
-      toggleForms();
+  // Form submission logic for Login and Sign-up
+  const onSubmit = async (data) => {
+    
+    const payload = isLogin
+      ? {
+          email: data.email,
+          password: data.password,
+        }
+      : {
+          email: data.email,
+          password: data.password,
+          username: data.fullname, 
+        };
+
+    const url = isLogin
+      ? "http://localhost:5000/api/auth/login"
+      : "http://localhost:5000/api/auth/register";
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload), 
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log("Success:", result);
+
+        if (isLogin) {
+          login();
+          navigate("/dashboard"); 
+        } else {
+         
+          setConfetti(true);
+          setTimeout(() => {
+            toggleForms(); 
+            setConfetti(false); 
+          }, 3000); 
+        }
+      } else {
+        alert(result.message || "Something went wrong!");
+      }
+    } catch (error) {
+      console.error("Network Error:", error);
+      alert("Unable to reach the server. Please try again later.");
     }
-    // Add API call or other logic here for both Sign Up and Login
   };
 
   return (
     <div className="form-container">
-      <div className="row">
-        {/* Left Side */}
-        <div className="col-md-6 welcome-back-section">
-          <h2>
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-          </h2>
-          <p>
-            {isLogin
-              ? "Click Sign Up to create your account"
-              : "Click Login to access your account"}
-          </p>
-          <button className="btn btn-primary" onClick={toggleForms}>
-            {isLogin ? "Sign Up" : "Login"}
-          </button>
-        </div>
+      {confetti && <Confetti />} 
+     
+        <div className="row">
+          {/* Left Side */}
+          <div className="col-md-6 welcome-back-section">
+            <h2>
+              {isLogin ? "Don't have an account?" : "Already have an account?"}
+            </h2>
+            <p>
+              {isLogin
+                ? "Click Sign Up to create your account"
+                : "Click Login to access your account"}
+            </p>
+           
+            <button className="btn btn-primary" onClick={toggleForms}>
+              {isLogin ? "Sign Up" : "Login"}
+            </button>
 
-        {/* Right Side */}
-        <div className="col-md-6 form-section">
-          {isLogin ? (
-            // Login Form
-            <form onSubmit={handleSubmit(onSubmit)} className="login-form">
-              <h2>Login</h2>
-              <div className="form">
-                <div className="form-group">
-                  <label htmlFor="username">
-                    Username
-                    {errors.username ? (
-                      <span className="invalid-feedback">
-                        {errors.username.message}
-                      </span>
-                    ) : (
-                      <span className="mandatory">*</span>
-                    )}
-                  </label>
-                  <input
-                    className={`form-control ${
-                      errors.username ? "is-invalid" : ""
-                    }`}
-                    type="text"
-                    name="username"
-                    {...register("username", {
-                      required: "Username is required",
-                    })}
-                    placeholder="Enter your username"
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="email">
-                    Email
-                    {errors.email ? (
-                      <span className="invalid-feedback">
-                        {errors.email.message}
-                      </span>
-                    ) : (
-                      <span className="mandatory">*</span>
-                    )}
-                  </label>
-                  <input
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    type="email"
-                    name="email"
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-                        message: "Invalid email format",
-                      },
-                    })}
-                    placeholder="Enter your email"
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="password">
-                    Password
-                    {errors.password ? (
-                      <span className="invalid-feedback">
-                        {errors.password.message}
-                      </span>
-                    ) : (
-                      <span className="mandatory">*</span>
-                    )}
-                  </label>
-                  <input
-                    className={`form-control ${
-                      errors.password ? "is-invalid" : ""
-                    }`}
-                    type="password"
-                    name="password"
-                    {...register("password", {
-                      required: "Password is required",
-                      minLength: 8,
-                    })}
-                    placeholder="Enter your password"
-                  />
-                </div>
+          
+            {isLogin && (
+              <div className="mt-2">
+                <span>
+                  Did you forget your password?{" "}
+                  <a href="./forget-password">Click Here</a>
+                </span>
               </div>
+            )}
+          </div>
 
-              <button type="submit" className="btn btn-primary">
-                Login
-              </button>
-              <span>Did you forget your password? <a href="./forget-password">Click Here</a></span>
-            </form>
-          ) : (
-            // Sign Up Form
-            <form onSubmit={handleSubmit(onSubmit)} className="signup-form">
-              <h2>Sign Up</h2>
-              <div className="form">
-              <div className="form-group">
-                <label htmlFor="fullname">
-                  Full Name
-                  {errors.fullname ? (
-                    <span className="invalid-feedback">
-                      {errors.fullname.message}
-                    </span>
-                  ) : (
-                    <span className="mandatory">*</span>
-                  )}
-                </label>
-                <input
-                  className={`form-control ${
-                    errors.fullname ? "is-invalid" : ""
-                  }`}
-                  type="text"
-                  name="fullname"
-                  {...register("fullname", {
-                    required: "Full name is required",
-                  })}
-                  placeholder="Enter your full name"
-                />
-              </div>
-
+          {/* Right Side */}
+          <div className="col-md-6 form-section">
+            <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
+              <h2>{isLogin ? "Login" : "Sign Up"}</h2>
               <div className="form-group">
                 <label htmlFor="email">
                   Email
-                  {errors.email ? (
+                  {errors.email && (
                     <span className="invalid-feedback">
                       {errors.email.message}
                     </span>
-                  ) : (
-                    <span className="mandatory">*</span>
                   )}
                 </label>
                 <input
                   className={`form-control ${errors.email ? "is-invalid" : ""}`}
                   type="email"
-                  name="email"
                   {...register("email", {
                     required: "Email is required",
                     pattern: {
@@ -194,61 +136,76 @@ const LoginSignup = () => {
               <div className="form-group">
                 <label htmlFor="password">
                   Password
-                  {errors.password ? (
+                  {errors.password && (
                     <span className="invalid-feedback">
                       {errors.password.message}
                     </span>
-                  ) : (
-                    <span className="mandatory">*</span>
                   )}
                 </label>
                 <input
-                  className={`form-control ${
-                    errors.password ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.password ? "is-invalid" : ""}`}
                   type="password"
-                  name="password"
                   {...register("password", {
                     required: "Password is required",
-                    minLength: 8,
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters long",
+                    },
                   })}
                   placeholder="Enter your password"
                 />
               </div>
+           
+              {!isLogin && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="confirmpassword">
+                      Confirm Password
+                      {errors.confirmpassword && (
+                        <span className="invalid-feedback">
+                          {errors.confirmpassword.message}
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      className={`form-control ${errors.confirmpassword ? "is-invalid" : ""}`}
+                      type="password"
+                      {...register("confirmpassword", {
+                        required: "Confirm password is required",
+                        validate: (value) =>
+                          value === watch("password") || "Passwords do not match",
+                      })}
+                      placeholder="Confirm your password"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="fullname">
+                      Full Name
+                      {errors.fullname && (
+                        <span className="invalid-feedback">
+                          {errors.fullname.message}
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      className={`form-control ${errors.fullname ? "is-invalid" : ""}`}
+                      type="text"
+                      {...register("fullname", {
+                        required: "Full name is required",
+                      })}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                </>
+              )}
 
-              <div className="form-group">
-                <label htmlFor="confirmpassword">
-                  Confirm Password
-                  {errors.confirmpassword ? (
-                    <span className="invalid-feedback">
-                      {errors.confirmpassword.message}
-                    </span>
-                  ) : (
-                    <span className="mandatory">*</span>
-                  )}
-                </label>
-                <input
-                  className={`form-control ${
-                    errors.confirmpassword ? "is-invalid" : ""
-                  }`}
-                  type="password"
-                  name="confirmpassword"
-                  {...register("confirmpassword", {
-                    required: "Confirm password is required",
-                    validate: (value) =>
-                      value === watch("password") || "Passwords do not match",
-                  })}
-                  placeholder="Confirm your password"
-                />
-              </div>
-              </div>
-              <button type="submit" className="btn">
-                Sign Up
+              <button type="submit" className="btn btn-primary">
+                {isLogin ? "Login" : "Sign Up"}
               </button>
             </form>
-          )}
+          </div>
         </div>
-      </div>
+    
     </div>
   );
 };

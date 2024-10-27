@@ -1,21 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
+import { Modal, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom'; 
 
 const Forget = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
     reset,
   } = useForm({
-    mode: "onSubmit", // Trigger validation on form submit
+    mode: "onSubmit", 
   });
 
+  const navigate = useNavigate(); 
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+
   // Handle form submission
-  const onSubmit = (data) => {
-    console.log("Form Submitted:", data);
-    // Perform any additional logic (like API calls)
-    reset(); // Reset form fields
+  const onSubmit = async (data) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.email,
+          new_password: data.password,
+          confirm_password: data.confirmPassword
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Password reset successful:", result);
+        setModalMessage("Password reset successful!"); 
+        setShowModal(true); 
+        reset(); 
+      } else {
+        setModalMessage(result.message || "Failed to reset password.");
+        setShowModal(true); 
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setModalMessage("An error occurred. Please try again later.");
+      setShowModal(true); 
+    }
+  };
+
+  // Function to handle modal button click
+  const handleModalClose = () => {
+    setShowModal(false); 
+    navigate('/login'); 
   };
 
   return (
@@ -23,16 +62,18 @@ const Forget = () => {
       <div className="row">
         {/* Left Side */}
         <div className="col-md-6 welcome-back-section">
-          <h2>Forgot your password?</h2>
-          <p>No worries! Enter your email and reset it now.</p>
+          <h2>🔑 Forgot your password?</h2> 
+          <p>No worries! Enter your new desired password.</p>
+          <p style={{ fontStyle: 'italic', color: '#007bff' }}>
+            *Ensure your password is strong for better security!
+          </p>
         </div>
 
-        {/* Right Side - Form Section */}
+        {/* Right Side */}
         <div className="col-md-6 form-section">
           <form onSubmit={handleSubmit(onSubmit)} className="login-form">
             <h2>Forget Password</h2>
 
-            {/* Email Field */}
             <div className="form-group">
               <label htmlFor="email">
                 Email
@@ -45,9 +86,7 @@ const Forget = () => {
                 )}
               </label>
               <input
-                className={`form-control ${
-                  errors.email ? "is-invalid" : ""
-                }`}
+                className={`form-control ${errors.email ? "is-invalid" : ""}`}
                 type="email"
                 {...register("email", {
                   required: "Email is required",
@@ -60,7 +99,6 @@ const Forget = () => {
               />
             </div>
 
-            {/* Password Field */}
             <div className="form-group">
               <label htmlFor="password">
                 New Password
@@ -73,9 +111,7 @@ const Forget = () => {
                 )}
               </label>
               <input
-                className={`form-control ${
-                  errors.password ? "is-invalid" : ""
-                }`}
+                className={`form-control ${errors.password ? "is-invalid" : ""}`}
                 type="password"
                 {...register("password", {
                   required: "Password is required",
@@ -88,40 +124,49 @@ const Forget = () => {
               />
             </div>
 
+            
             <div className="form-group">
-              <label htmlFor="password">
+              <label htmlFor="confirmPassword">
                 Confirm New Password
-                {errors.password ? (
+                {errors.confirmPassword ? (
                   <span className="invalid-feedback">
-                    {errors.password.message}
+                    {errors.confirmPassword.message}
                   </span>
                 ) : (
                   <span className="mandatory">*</span>
                 )}
               </label>
               <input
-                className={`form-control ${
-                  errors.password ? "is-invalid" : ""
-                }`}
+                className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
                 type="password"
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters long",
-                  },
+                {...register("confirmPassword", {
+                  required: "Confirm password is required",
+                  validate: (value) =>
+                    value === watch("password") || "Passwords do not match",
                 })}
-                placeholder="Enter your new password"
+                placeholder="Confirm your new password"
               />
             </div>
 
-            {/* Submit Button */}
             <button type="submit" className="btn btn-primary">
               Submit
             </button>
           </form>
         </div>
       </div>
+
+      {/* Modal  */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Notification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{modalMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleModalClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
