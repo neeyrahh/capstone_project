@@ -11,6 +11,8 @@ import TaskDetails from "./components/TaskDetails";
 import Dashboard from "./components/Dashboard";
 import Hompage from "./components/Hompage";
 import Forget from "./components/Forget-password";
+import AddBoardForm from "./components/AddBoardForm";
+import AddCardForm from "./components/AddCardForm"; // Import the AddCardForm component
 
 const router = createBrowserRouter([
   {
@@ -44,6 +46,22 @@ const router = createBrowserRouter([
       },
       { path: "/login", element: <Login /> },
       { path: "/forget-password", element: <Forget /> },
+      {
+        path: "/add-board",
+        element: (
+          <ProtectedRoute>
+            <AddBoardForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/tasks/add", // New route for adding a card
+        element: (
+          <ProtectedRoute>
+            <AddCardForm />
+          </ProtectedRoute>
+        ),
+      },
       { path: "*", element: <p>404 Page Not Found</p> },
     ],
   },

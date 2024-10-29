@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Container, Card, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom'; 
 import '../styles/Tasks.css';
 
 const mockLists = [
@@ -37,10 +37,15 @@ const mockLists = [
 
 const Tasks = () => {
   const [lists, setLists] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLists(mockLists);
   }, []);
+
+  const handleAddCard = () => {
+    navigate("/tasks/add"); // Navigates to the AddCardForm page
+  };
 
   return (
     <Container fluid className="tasks-container p-4">
@@ -62,7 +67,13 @@ const Tasks = () => {
                   </Card>
                 </Link>
               ))}
-              <Button variant="outline-secondary" className="w-100 mt-2 add-card-btn">+ Add a card</Button>
+              <Button
+                variant="outline-secondary"
+                className="w-100 mt-2 add-card-btn"
+                onClick={handleAddCard} // Trigger navigation on click
+              >
+                + Add a card
+              </Button>
             </div>
           </Col>
         ))}
