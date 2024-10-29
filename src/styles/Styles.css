@@ -285,3 +285,129 @@ footer p {
   margin-bottom: 0;
   color: var(--white);
 }
+
+/*AddBoardForm styles*/
+.add-board-form {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: var(--shadow-medium);
+  border-radius: 8px;
+}
+
+.add-board-form h2 {
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  width: 100%;
+}
+
+/*floating button*/
+.floating-action-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #3d53db;
+  color: white;
+  font-size: 24px;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.floating-action-button:hover {
+  background-color: #1a2793;
+}
+.dragging-over {
+  background-color: #f0f8ff;
+}
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  /* Stacks Task Statistics cards vertically */
+  .row.mb-4 .col-md-12.d-flex.pb-4 {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Task Distribution Section */
+  .col-md-12.d-flex.mb-4 {
+    flex-direction: column;
+  }
+
+  /* Pie Chart and Table stacked */
+  .col-md-6.d-flex {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  /* Floating Button size and position for smaller screens */
+  .floating-action-button {
+    width: 50px;
+    height: 50px;
+    bottom: 15px;
+    right: 15px;
+  }
+
+  /* Add padding and adjustments for AddBoardForm */
+  .add-board-form {
+    max-width: 90%;
+    padding: 15px;
+  }
+
+  /* Table adjustments for overflow */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Further reduce Floating Button size */
+  .floating-action-button {
+    width: 45px;
+    height: 45px;
+    bottom: 10px;
+    right: 10px;
+  }
+}
+.add-card-form-container {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-card-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.add-card-form .form-group {
+  margin-bottom: 15px;
+}
+
+.add-card-form .form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.add-card-form .btn {
+  width: 100%;
+  margin-top: 10px;
+}
