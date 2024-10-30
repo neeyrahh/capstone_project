@@ -8,16 +8,19 @@ const Header = () => {
   const { isAuthenticated, logout } = useAuth();
 
   const headerLinks = [
-    { link: "#about", text: "About" },
-    { link: "#features", text: "Features" },
-    { link: "#faq", text: "FAQ" },
+    { link: "/", text: "Home" },
+    // { link: "#about", text: "About" },
+    // { link: "#features", text: "Features" },
+    // { link: "#faq", text: "FAQ" },
     ...(isAuthenticated
       ? [
           { link: "/dashboard", text: "Dashboard" },
           { link: "/tasks", text: "Tasks" },
           { link: "#", text: "Logout", onClick: logout },
         ]
-      : []),
+      : [
+        { link: "/login", text: "Login" },
+      ]),
   ];
 
   return (
@@ -31,9 +34,15 @@ const Header = () => {
           <Nav className="ms-auto align-items-center">
             {headerLinks.map((headerLink, index) => (
               <Nav.Link
-                href={headerLink.link}
-                key={index}
-                className="nav-link-custom"
+              as={headerLink.link === "#" ? "button" : Link}
+              to={headerLink.link === "#" ? undefined : headerLink.link}
+              key={headerLink.text}
+               style={{
+                margin:"8px",
+                color:"#03061f"
+               }}
+                
+                // className="nav-link-custom"
                 onClick={(e) => {
                   if (headerLink.link === "#") {
                     e.preventDefault();
@@ -44,13 +53,13 @@ const Header = () => {
                 {headerLink.text}
               </Nav.Link>
             ))}
-            <Nav.Link
+            {/* <Nav.Link
               as={Link}
               to="/login"
               className="sign-up-btn d-flex align-items-center"
             >
               Login/Sign Up
-            </Nav.Link>
+            </Nav.Link> */}
           </Nav>
         </Navbar.Collapse>
       </Container>

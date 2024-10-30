@@ -57,7 +57,7 @@ const Footer = () => {
               181 Bay Street, Wellington Tower, Suite 292 Toronto, Ontario M5J 2T3
             </p>
             <p className="footer-language">
-              <img src={`${process.env.PUBLIC_URL}/images/uk-flag.png`} alt="UK Flag" /> English (UK)
+              <img src={`${process.env.PUBLIC_URL}/images/Flag_of_Canada.svg`} alt="CANADA Flag" /> English (UK)
             </p>
           </Col>
         </Row>
