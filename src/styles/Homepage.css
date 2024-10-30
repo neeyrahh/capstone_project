@@ -1,0 +1,335 @@
+.hero-section {
+    background-color: var(--grey-light);
+    color: var(--primary-dark);
+  }
+  .hero-section .highlight {
+    color: var(--green);
+  }
+  .get-started-btn {
+    background-color: var(--button-bg-primary);
+    color: var(--button-text-color);
+  }
+  
+  .partners-section .partner-logo {
+    max-width: 100px;
+    margin: 0 15px;
+  }
+  
+  .features-section .feature-card {
+    background-color: var(--white);
+    text-align: center;
+    justify-content: center;
+    padding: 30px;
+    height: 350px;
+    border: 0.45px solid var(--primary-dark);
+  }
+  
+  .core-values-section .value-card {
+    border: 1px solid var(--primary-light);
+    padding: 20px;
+  }
+  
+/* Image Banner Section */
+.statistics-banner {
+    background: var(--primary-dark-alt);
+    color: var(--white);
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    margin: 5rem 0;
+}
+
+.statistics-banner img.single-image {
+    height: 100%;
+    width: auto;
+    object-fit: cover;
+}
+
+  
+  .faq-section .accordion-button {
+    color: var(--primary-dark);
+  }
+  .cta-banner {
+    background-color: var(--primary-dark);
+    color: var(--white);
+  }
+  .cta-btn {
+    background-color: var(--button-bg-primary);
+    color: var(--white);
+  }
+
+
+  /*Banner Style*/
+  .py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 4rem !important;
+}
+
+  p.small-text.text-uppercase.text-success {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    color: var(--green) !important;
+}
+
+  .text-section h1 {
+    font-size: 4rem;
+  }
+
+  .ms-4 {
+    display: flex;
+    margin-left: 1.5rem !important;
+}
+  
+  .text-section span {
+    font-style: italic;
+    font-size: 4rem;
+    font-weight: 500;
+    color: var(--grey-dark);
+  }
+
+  .mt-3 {
+    width: 80%;
+    font-weight: 300;
+    margin-top: 6rem !important;
+    color: var( --body-text);
+}
+  
+.text-center.container {
+    margin: 2rem 0;
+}
+
+  /* Button and Review Styling */
+.button-review-container {
+    display: flex;
+    align-items: center;
+  }
+
+  button.btn.btn-primary.get-started {
+    margin-top: 0 !important;
+    width: 40% !important;
+}
+  
+.reviews {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 0.75rem !important;
+  }
+  
+  .stars {
+    display: flex;
+    align-items: center;
+  }
+  
+  span.rating-score.ms-2 {
+    font-size: 0.90rem;
+    color: var(--primary-dark);
+    font-weight: 600;
+  }
+  
+  .review-text {
+    color: var(--body-text);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-left: 1.5rem !important;
+  }
+  
+  .review-link {
+    color: var( --primary-dark-alt);
+    text-decoration: underline;
+  }
+  
+  /* Icon Sizing */
+  .stars svg {
+    font-size: 20px;
+    height: 0.95rem;
+    /* margin-right: 2px; */
+  }
+
+  .text-section.col-md-6 {
+    margin-top: 4em;
+}
+
+
+ /* Right Section Image */
+.image-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .single-image {
+    max-width: 88%;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  /* Partner Section */
+  svg.partner-logo {
+    color: var(--primary-dark);
+    stroke-width: 0.35em;
+}
+
+/* About Section */
+.about-section h2, .features-section h2 {
+    margin-top: 2rem;
+    font-size: 3rem;
+    /* align-items: center; */
+    padding: 0 22%;
+    color: var(--primary-dark);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .features-section h2 {
+    margin-top: 0 !important;
+    padding: 0 7% !important;
+  }
+  
+  .about-section .description {
+    font-size: var(--font-size-regular);
+    margin-top: 1rem;
+    font-weight: 300;
+    padding: 0 20%;
+    margin-top: 3rem !important;
+    color: var(--body-text);
+  }
+
+  p.feature-description {
+    font-size: var(--font-size-regular);
+    margin-top: 1rem;
+    font-weight: 300;
+    padding: 0 15%;
+    margin-top: 3rem !important;
+    color: var(--body-text);
+}
+
+  /* Card and Icon Styling */
+  .align-items-center.mb-4.row {
+    margin-bottom: 3rem !important;
+}
+
+  .feature-card {
+    border: 1px solid var(--input-border-color);
+    padding: var(--spacing-large);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    text-align: left;
+    transition: transform 0.3s ease;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  /* Icon, Title, and Text Alignment */
+  .feature-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    height: 100%;
+  }
+  
+  .feature-icon {
+    font-size: 4rem;
+    color: var(--primary-dark-alt);
+    margin-bottom: var(--spacing-small);
+  }
+  
+  .feature-title {
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-medium);
+    color: var(--primary-dark);
+    margin-top: var(--spacing-small);
+  }
+
+  .feature-text-group {
+    margin-top: auto;
+    text-align: left;
+  }
+  
+  .feature-text {
+    color: var(--body-text);
+    font-size: var(--font-size-regular);
+    text-align: left;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+/* FAQ Styling */
+
+.faq-section {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  
+  .faq-title-col {
+    text-align: left;
+    padding-right: var(--spacing-large);
+  }
+  
+  .faq-title {
+    font-size: 3rem;
+    color: var(--primary-dark);
+    font-weight: var(--font-weight-regular);
+  }
+  
+  .faq-items-col {
+    text-align: left;
+    padding-left: var(--spacing-large);
+  }
+
+  .accordion-header {
+    margin: 1.5rem 0 0;
+}
+  
+  .accordion-button:not(.collapsed) {
+    color: var(--primary-dark);
+    font-weight: var(--font-weight-medium);
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  
+  .accordion-button {
+    color: var(--body-text);
+    font-size: 1.2rem;
+    font-weight: var(--font-weight-regular);
+    background-color: transparent;
+    border: none;
+    padding: var(--spacing-small) 0;
+    padding-top: var(--spacing-small); /* Adjust as needed */
+    padding-bottom: var(--spacing-large); /* Increase this to add space */
+  }
+  
+  .accordion-body {
+    color: var(--body-text);
+    font-size: var(--font-size-regular);
+    text-align: left;
+    font-weight: 300;
+    width: 83%;
+    line-height: 1.6;
+    padding: 0 0 2rem 0 !important;
+  }
+  
+  .accordion-button::after {
+    transform: scale(0.95);
+  }
+  
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+  
+  .accordion-flush>.accordion-item>.accordion-header .accordion-button, .accordion-flush>.accordion-item>.accordion-header .accordion-button.collapsed {
+    border-radius: 0;
+    font-size: var(--font-size-large);
+    font-weight: 300;
+    color: var(--primary-dark);
+  }

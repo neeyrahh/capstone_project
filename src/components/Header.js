@@ -1,48 +1,65 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import '../styles/Styles.css';
 import { Container, Nav, Navbar } from "react-bootstrap";
-import { useAuth } from './Auth/AuthContext'; 
+import "../styles/Styles.css";
+import { useAuth } from "./Auth/AuthContext";
 
 const Header = () => {
-  const { isAuthenticated, logout } = useAuth(); 
+  const { isAuthenticated, logout } = useAuth();
 
   const headerLinks = [
     { link: "/", text: "Home" },
-    ...(isAuthenticated ? [
-      { link: "/dashboard", text: "Dashboard" },
-      { link: "/tasks", text: "Tasks" },
-      { link: "#", text: "Logout", onClick: logout } // Added Logout link
-    ] : [
-      { link: "/login", text: "Login" },
-    ]),
+    // { link: "#about", text: "About" },
+    // { link: "#features", text: "Features" },
+    // { link: "#faq", text: "FAQ" },
+    ...(isAuthenticated
+      ? [
+          { link: "/dashboard", text: "Dashboard" },
+          { link: "/tasks", text: "Tasks" },
+          { link: "#", text: "Logout", onClick: logout },
+        ]
+      : [
+        { link: "/login", text: "Login" },
+      ]),
   ];
 
   return (
-    <Navbar className="header" variant="dark" expand="lg">
+    <Navbar className="header py-3" expand="lg">
       <Container>
-        <Navbar.Brand as={Link} to="/">
+        <Navbar.Brand href="/" className="brand-name">
           TrackIt
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
-            {headerLinks.map((headerLink) => (
-              <Nav.Link 
-                as={headerLink.link === "#" ? "button" : Link} // Use button for logout
-                to={headerLink.link === "#" ? undefined : headerLink.link}
-                key={headerLink.text} 
-                style={{ marginTop: '8px' }} 
+          <Nav className="ms-auto align-items-center">
+            {headerLinks.map((headerLink, index) => (
+              <Nav.Link
+              as={headerLink.link === "#" ? "button" : Link}
+              to={headerLink.link === "#" ? undefined : headerLink.link}
+              key={headerLink.text}
+               style={{
+                margin:"8px",
+                color:"#03061f"
+               }}
+                
+                // className="nav-link-custom"
                 onClick={(e) => {
                   if (headerLink.link === "#") {
-                    e.preventDefault(); // Prevent the default anchor behavior
-                    headerLink.onClick(); // Call logout
+                    e.preventDefault();
+                    headerLink.onClick();
                   }
                 }}
               >
                 {headerLink.text}
               </Nav.Link>
             ))}
+            {/* <Nav.Link
+              as={Link}
+              to="/login"
+              className="sign-up-btn d-flex align-items-center"
+            >
+              Login/Sign Up
+            </Nav.Link> */}
           </Nav>
         </Navbar.Collapse>
       </Container>

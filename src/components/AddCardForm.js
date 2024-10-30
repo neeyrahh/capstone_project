@@ -16,8 +16,8 @@ const AddCardForm = () => {
   };
 
   return (
-    <div className="add-card-form-container">
-      <h2>Add New Card</h2>
+    <div className="task-details-container">
+      <h2 className='task-title'>Add New Card</h2>
       <form onSubmit={handleSubmit} className="add-card-form">
         <div className="form-group">
           <label>Title</label>
@@ -51,8 +51,10 @@ const AddCardForm = () => {
             className="form-control"
           />
         </div>
-        <button type="submit" className="btn btn-primary">Add Card</button>
-        <button type="button" onClick={() => navigate('/tasks')} className="btn btn-secondary">Cancel</button>
+        <div className='task-actions'>
+        <button type="submit" className="button-primary">Add Card</button>
+        <button type="button" onClick={() => navigate('/tasks')} className="button-danger">Cancel</button>
+        </div>
       </form>
     </div>
   );
