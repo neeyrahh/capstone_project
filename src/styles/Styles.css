@@ -11,6 +11,7 @@
   --green: #2a3bb7;
   --white: #ffffff;
   --grey-light: #fcfcfc;
+  --body-text: #5a5e6b;
   --grey-dark: #131313;
 
   /* Font Settings */
@@ -49,8 +50,61 @@
   --spacing-large: 24px;
 }
 
-/* Header Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Header styles */
 .header {
+  background-color: var(--white); /* Assuming white background as per screenshot */
+  border-bottom: 1px solid #e5e5e5; /* Light border for subtle separation */
+}
+
+.brand-name {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-dark);
+  font-size: var(--font-size-large);
+}
+
+.nav-link-custom {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-regular);
+  color: var(--primary-dark-alt) !important;
+  margin-right: 1rem;
+}
+
+.nav-link-custom:hover {
+  color: var(--primary-default) !important;
+}
+
+.nav-login-link {
+  color: var(--primary-dark-alt) !important;
+  font-weight: var(--font-weight-regular);
+  margin-right: 1.5rem;
+}
+
+.sign-up-btn {
+  font-size: 0.85rem;
+  /* letter-spacing: 0.02rem; */
+  font-weight: 400;
+  color: var(--primary-light2) !important;
+  background-color: var(--button-bg-primary);
+  border-radius: var(--button-border-radius);
+  padding: 15px 40px !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.sign-up-btn:hover {
+  background-color: var(--primary-dark-alt);
+  color: var(--white) !important;
+}
+
+
+/* .header {
   background-color: var(--primary-dark);
   color: var(--white) !important;
 }
@@ -61,7 +115,7 @@
 
 .header .navbar-brand {
   color: var(--white);
-}
+} */
 
 /* Global Styles */
 body {
@@ -89,6 +143,18 @@ h1,h2,h3,h4,h5,h6 {
   flex-direction: column;
   justify-content: center;
   /* text-align: center; */
+}
+
+.mt-2 {
+  margin-top: .5rem !important;
+  font-size: 0.85rem;
+  font-weight: 300;
+  /* text-decoration: none; */
+}
+
+a {
+  text-decoration: none;
+  font-weight: 400;
 }
 
 .form {
@@ -274,14 +340,82 @@ button .btn:hover {
   opacity: 0;
 }
 
-/* Footer Styles */
-footer {
-  background-color: var(--primary-dark);
-  color: var(--grey-light);
-  padding: 20px 0;
+/* Footer Section */
+
+.row.footer-row {
+  margin-top: 2rem;
 }
 
-footer p {
-  margin-bottom: 0;
+.footer-section {
+  color: var(--white);
+  background-color: var(--primary-dark);
+}
+
+.footer-heading {
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
   color: var(--white);
 }
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  font-size: var(--font-size-regular);
+  color: var(--white);
+  font-weight: 300;
+  margin: 1.5rem 0;
+}
+
+.footer-logo {
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-light);
+  margin-bottom: 1rem;
+}
+
+.footer-address {
+  font-size: var(--font-size-regular);
+  color: var(--white);
+  font-weight: 300;
+  width: 40%;
+  line-height: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.footer-language img {
+  width: 20px;
+  margin-right: 5px;
+}
+
+.footer-language {
+  font-size: var(--font-size-regular);
+  color: var(--white);
+  font-weight: 300;
+}
+
+.footer-bottom-text {
+  font-size: var(--font-size-small);
+  color: var(--white);
+  font-weight: var(--font-weight-regular);
+}
+
+.footer-bottom-text a {
+  color: var(--white);
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+
+.footer-bottom-text a:hover {
+  text-decoration: underline;
+}
+
+/* Divider line */
+.footer-section hr {
+  border-color: var(--primary-light);
+  margin: 1.5rem 0;
+}
+
