@@ -9,6 +9,7 @@ import { useAuth } from './Auth/AuthContext';
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [confetti, setConfetti] = useState(false); 
+  const [error, setError] = useState('')
   const { login } = useAuth(); 
   const navigate = useNavigate();
 
@@ -28,6 +29,7 @@ const LoginSignup = () => {
 
   // Form submission logic for Login and Sign-up
   const onSubmit = async (data) => {
+    setError('');
     
     const payload = isLogin
       ? {
@@ -37,41 +39,43 @@ const LoginSignup = () => {
       : {
           email: data.email,
           password: data.password,
-          username: data.fullname, 
+          username: data.fullname,
         };
-
+  
     const url = isLogin
       ? "http://localhost:5000/api/auth/login"
       : "http://localhost:5000/api/auth/register";
-
+  
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload), 
+        body: JSON.stringify(payload),
       });
-
+  
       const result = await response.json();
+      
       if (response.ok) {
         console.log("Success:", result);
-
+  
         if (isLogin) {
-          login();
-          navigate("/dashboard"); 
+          // Store the userId in sessionStorage
+          sessionStorage.setItem('userId', result.userId);
+          login(); // Your existing login function
+          navigate("/dashboard");
         } else {
-         
           setConfetti(true);
           setTimeout(() => {
-            toggleForms(); 
-            setConfetti(false); 
-          }, 3000); 
+            toggleForms();
+            setConfetti(false);
+          }, 3000);
         }
       } else {
-        alert(result.message || "Something went wrong!");
+        setError(result.msg || "Something went wrong!");
       }
     } catch (error) {
       console.error("Network Error:", error);
-      alert("Unable to reach the server. Please try again later.");
+      setError("Unable to reach the server. Please try again later.");
     }
   };
 

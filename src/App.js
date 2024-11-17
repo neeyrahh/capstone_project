@@ -55,7 +55,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/tasks/add", // New route for adding a card
+        path: "/tasks/add",
         element: (
           <ProtectedRoute>
             <AddCardForm />

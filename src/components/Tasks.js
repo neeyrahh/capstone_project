@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Container, Card, Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Row, Col, Container, Card, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './Auth/AuthContext';
 import '../styles/Tasks.css';
 
 const mockLists = [
@@ -37,18 +38,94 @@ const mockLists = [
 
 const Tasks = () => {
   const [lists, setLists] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     setLists(mockLists);
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   const handleAddCard = () => {
-    navigate("/tasks/add"); // Navigates to the AddCardForm page
+    navigate("/tasks/add");
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEmail('');
+    setError('');
+    setSuccess('');
+  };
+
+  const handleShowModal = () => {
+    setShowModal(true);
+  };
+
+  const handleInviteMember = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // const userId = localStorage.getItem('userId'); // Get userId from localStorage
+      
+      const response = await fetch('http://localhost:5000/api/board-member/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          boardId: "673a1f69b726ca4c57c4b463", // Your board ID
+          email: email
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess('Member invited successfully!');
+        setTimeout(() => {
+          handleCloseModal();
+        }, 2000);
+      } else {
+        if (response.status === 401) {
+          setError('Please sign in again to continue.');
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+        } else {
+          setError(data.msg || 'Failed to invite member');
+        }
+      }
+    } catch (err) {
+      setError('Failed to connect to server. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Container fluid className="tasks-container p-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h4>Tasks Board</h4>
+        <Button 
+          variant="primary" 
+          onClick={handleShowModal}
+          className="invite-member-btn"
+        >
+          + Invite Member
+        </Button>
+      </div>
+
       <Row className="gx-3">
         {lists.map(list => (
           <Col key={list.ListID} md={3} className="mb-4">
@@ -70,7 +147,7 @@ const Tasks = () => {
               <Button
                 variant="outline-secondary"
                 className="w-100 mt-2 add-card-btn"
-                onClick={handleAddCard} // Trigger navigation on click
+                onClick={handleAddCard}
               >
                 + Add a card
               </Button>
@@ -78,6 +155,44 @@ const Tasks = () => {
           </Col>
         ))}
       </Row>
+
+      {/* Invite Member Modal */}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Invite Member</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error && <Alert variant="danger">{error}</Alert>}
+          {success && <Alert variant="success">{success}</Alert>}
+          <Form onSubmit={handleInviteMember}>
+            <Form.Group className="mb-3">
+              <Form.Label>Email address</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Form.Text className="text-muted">
+                Enter the email address of the person you want to invite.
+              </Form.Text>
+            </Form.Group>
+            <div className="d-flex justify-content-end">
+              <Button variant="secondary" onClick={handleCloseModal} className="me-2">
+                Cancel
+              </Button>
+              <Button 
+                variant="primary" 
+                type="submit" 
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Send Invitation'}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

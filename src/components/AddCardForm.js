@@ -5,6 +5,7 @@ const AddCardForm = () => {
   const [title, setTitle] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [description, setDescription] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -39,6 +40,15 @@ const AddCardForm = () => {
             required
             className="form-control"
             placeholder="Assign to..."
+          />
+        </div>
+        <div className="form-group">
+          <label>Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            className="form-control"
           />
         </div>
         <div className="form-group">
