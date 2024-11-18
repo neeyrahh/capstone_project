@@ -82,13 +82,14 @@ const Tasks = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer dummyToken',
         },
         body: JSON.stringify({
           boardId: "673a1f69b726ca4c57c4b463", // Your board ID
           email: email
         })
       });
-
+      console.log(response);
       const data = await response.json();
 
       if (response.ok) {
