@@ -1,72 +1,207 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Alert, Container, Form, Button } from 'react-bootstrap';
 
 const AddCardForm = () => {
+  const { boardId } = useParams();
   const [title, setTitle] = useState('');
-  const [assignedTo, setAssignedTo] = useState('');
+  const [assign_to, setAssignTo] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [description, setDescription] = useState('');
+  const [boardMembers, setBoardMembers] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [loadingMembers, setLoadingMembers] = useState(true);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Logic to handle adding the card, e.g., an API call or state update
+  const fetchBoardMembers = useCallback(async () => {
+    setLoadingMembers(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/board-members/${boardId}`,
+        {
+          credentials: 'include'
+        }
+      );
 
-    // After successful card addition, navigate back to the tasks page
-    navigate('/tasks');
+      if (!response.ok) {
+        throw new Error('Failed to fetch board members');
+      }
+
+      const data = await response.json();
+      console.log('Board members data:', data);
+      
+      // Check if the response has board_members array
+      if (data && data.board_members && Array.isArray(data.board_members)) {
+        setBoardMembers(data.board_members);
+      } else if (Array.isArray(data)) {
+        // If the response is directly an array
+        setBoardMembers(data);
+      } else {
+        console.error('Unexpected data format:', data);
+        throw new Error('Invalid board members data format');
+      }
+    } catch (err) {
+      console.error('Error fetching board members:', err);
+      setError('Failed to load board members. Please try again.');
+      setBoardMembers([]);
+    } finally {
+      setLoadingMembers(false);
+    }
+  }, [boardId]);
+
+  // Single useEffect that depends on fetchBoardMembers
+  useEffect(() => {
+    if (!boardId) {
+      navigate('/dashboard');
+      return;
+    }
+    fetchBoardMembers();
+  }, [boardId, navigate, fetchBoardMembers]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const formattedDate = new Date(dueDate).toISOString();
+
+      console.log('Submitting card with data:', {
+        boardId,
+        title,
+        description,
+        assign_to,
+        dueDate: formattedDate,
+        position: 4
+      });
+
+      const response = await fetch('http://localhost:5000/api/card/create', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          boardId,
+          title,
+          description,
+          assign_to,
+          dueDate: formattedDate,
+          position: 4
+        })
+      });
+
+      const data = await response.json();
+      console.log('Card creation response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.msg || 'Failed to create card');
+      }
+
+      // Navigate back to the board's tasks view
+      navigate(`/tasks/${boardId}`);
+    } catch (err) {
+      console.error('Error creating card:', err);
+      setError(err.message || 'Failed to create card. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="task-details-container">
-      <h2 className='task-title'>Add New Card</h2>
-      <form onSubmit={handleSubmit} className="add-card-form">
-        <div className="form-group">
-          <label>Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="form-control"
-            placeholder="Enter card title"
-          />
+    <Container className="py-4">
+      <div className="card shadow-sm">
+        <div className="card-body">
+          <h2 className='card-title mb-4'>Add New Card</h2>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Title</Form.Label>
+              <Form.Control
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                placeholder="Enter card title"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Assigned To</Form.Label>
+              {loadingMembers ? (
+                <div className="text-muted">
+                  <span className="spinner-border spinner-border-sm me-2" />
+                  Loading board members...
+                </div>
+              ) : (
+                <Form.Select
+                  value={assign_to}
+                  onChange={(e) => setAssignTo(e.target.value)}
+                  required
+                >
+                  <option value="">Select a board member...</option>
+                  {boardMembers.map((member) => (
+                    <option 
+                      key={member.user_id} 
+                      value={member.user_id}
+                    >
+                      {member.email || member.user_id}
+                    </option>
+                  ))}
+                </Form.Select>
+              )}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                placeholder="Enter card description"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Due Date</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <div className="d-flex gap-2">
+              <Button 
+                type="submit" 
+                variant="primary"
+                disabled={loading || loadingMembers}
+                style={{ minWidth: '120px' }}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" />
+                    Creating...
+                  </>
+                ) : 'Add Card'}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline-secondary"
+                onClick={() => navigate(`/tasks/${boardId}`)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            </div>
+          </Form>
         </div>
-        <div className="form-group">
-          <label>Assigned To</label>
-          <input
-            type="text"
-            value={assignedTo}
-            onChange={(e) => setAssignedTo(e.target.value)}
-            required
-            className="form-control"
-            placeholder="Assign to..."
-          />
-        </div>
-        <div className="form-group">
-          <label>Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            className="form-control"
-          />
-        </div>
-        <div className="form-group">
-          <label>Due Date</label>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
-            className="form-control"
-          />
-        </div>
-        <div className='task-actions'>
-        <button type="submit" className="button-primary">Add Card</button>
-        <button type="button" onClick={() => navigate('/tasks')} className="button-danger">Cancel</button>
-        </div>
-      </form>
-    </div>
+      </div>
+    </Container>
   );
 };
 

@@ -29,10 +29,11 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/tasks",
+        path: "/tasks/:boardId", 
         element: (
           <ProtectedRoute>
             <Tasks />
+            
           </ProtectedRoute>
         ),
       },
@@ -55,7 +56,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/tasks/add",
+        path: "/tasks/:boardId/add", 
         element: (
           <ProtectedRoute>
             <AddCardForm />
