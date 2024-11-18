@@ -30,7 +30,7 @@ const LoginSignup = () => {
   // Form submission logic for Login and Sign-up
   const onSubmit = async (data) => {
     setError('');
-    
+  
     const payload = isLogin
       ? {
           email: data.email,
@@ -43,25 +43,25 @@ const LoginSignup = () => {
         };
   
     const url = isLogin
-      ? "http://localhost:5000/api/auth/login"
+      ? "http://localhost:5000/api/auth/login" // Updated to backend port
       : "http://localhost:5000/api/auth/register";
   
     try {
       const response = await fetch(url, {
         method: "POST",
+        credentials: "include", // Ensure cookies are sent
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
   
       const result = await response.json();
-      
+  
       if (response.ok) {
         console.log("Success:", result);
   
         if (isLogin) {
-          // Store the userId in sessionStorage
-          sessionStorage.setItem('userId', result.userId);
-          login(); // Your existing login function
+          sessionStorage.setItem('userId', result.userId); // Ensure this is used as needed
+          login(); // Existing login function
           navigate("/dashboard");
         } else {
           setConfetti(true);
@@ -78,7 +78,7 @@ const LoginSignup = () => {
       setError("Unable to reach the server. Please try again later.");
     }
   };
-
+  
   return (
     <div className="form-container">
       {confetti && <Confetti />} 

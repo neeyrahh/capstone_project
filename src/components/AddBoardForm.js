@@ -12,15 +12,18 @@ const AddBoardForm = () => {
     try {
       const response = await fetch("http://localhost:5000/api/board/create", {
         method: "POST",
+        credentials: "include", // Ensure cookies are sent
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, description }),
       });
+
       const data = await response.json();
+
       if (response.ok) {
         alert("Board created successfully!");
-        navigate('/dashboard');
+        navigate('/dashboard'); // Navigate to the dashboard
       } else {
         alert(data.msg || "Error creating board");
       }
