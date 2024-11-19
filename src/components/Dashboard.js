@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
-import { Table, Button } from "react-bootstrap"; // Added Button import
+import { Table, Button, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import '../styles/Styles.css';
 
 const COLORS = ["#2996ff", "#e8651d", "#ff0000b3", "#861de8e3", "#9a1de8"];
 
@@ -10,7 +11,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [boardData, setBoardData] = useState([]);
   const [pieData, setPieData] = useState([]);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedBoard, setSelectedBoard] = useState(null);
+  const [updatedName, setUpdatedName] = useState("");
+  const [updatedDescription, setUpdatedDescription] = useState("");
+  const [error, setError] = useState("");
 
+  // Fetch board data
   useEffect(() => {
     const fetchBoards = async () => {
       try {
@@ -61,186 +68,248 @@ const Dashboard = () => {
     navigate(`/tasks/${boardId}`);
   };
 
+  const handleEditBoard = (board) => {
+    setSelectedBoard(board);
+    setUpdatedName(board.name);
+    setUpdatedDescription(board.description);
+    setShowEditModal(true);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!updatedName || !updatedDescription) {
+      setError("Name and description are required");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/board/update/${selectedBoard._id}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: updatedName,
+            description: updatedDescription,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.msg || "Failed to update board");
+      }
+
+      setBoardData((prevData) =>
+        prevData.map((board) =>
+          board._id === selectedBoard._id
+            ? { ...board, name: updatedName, description: updatedDescription }
+            : board
+        )
+      );
+
+      setShowEditModal(false);
+      setSelectedBoard(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleCloseBoard = async (boardId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/board/close/${boardId}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.msg || "Failed to close board");
+      }
+
+      setBoardData((prevData) =>
+        prevData.filter((board) => board._id !== boardId)
+      );
+    } catch (err) {
+      console.error("Error closing board:", err);
+    }
+  };
+
   return (
     <div className="dashboard-container p-4">
       <h1 className="mb-3">Dashboard</h1>
-      <p className="lead mb-4">Below is the overview of your boards. Manage your boards effectively.</p>
+      <p className="lead mb-4">
+        Below is the overview of your boards. Manage your boards effectively.
+      </p>
 
-      <div className="row">
-        {/* Statistics Cards */}
-        <div className="col-12 mb-4">
-          <div className="card shadow-sm" style={{ backgroundColor: "#b4b4b41c", border: "none" }}>
-            <div className="card-body">
-              <h5 className="card-title mb-4">Board Statistics</h5>
-              <div className="row">
-                <div className="col-md-3 mb-3">
-                  <div className="card shadow-sm h-100" style={{ backgroundColor: "#1d84e8b3", color: "white", border: "none" }}>
-                    <div className="card-body text-center">
-                      <h6 className="card-title">Total Boards</h6>
-                      <p className="stat-val h3 mb-0">{boardData.length}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <div className="card shadow-sm h-100" style={{ backgroundColor: "#e8651dba", color: "white", border: "none" }}>
-                    <div className="card-body text-center">
-                      <h6 className="card-title">Started</h6>
-                      <p className="stat-val h3 mb-0">
-                        {boardData.filter((board) => board.status === "started").length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <div className="card shadow-sm h-100" style={{ backgroundColor: "#ff00008f", color: "white", border: "none" }}>
-                    <div className="card-body text-center">
-                      <h6 className="card-title">In Progress</h6>
-                      <p className="stat-val h3 mb-0">
-                        {boardData.filter((board) => board.status === "in-progress").length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <div className="card shadow-sm h-100" style={{ backgroundColor: "#861de8a6", color: "white", border: "none" }}>
-                    <div className="card-body text-center">
-                      <h6 className="card-title">Done</h6>
-                      <p className="stat-val h3 mb-0">
-                        {boardData.filter((board) => board.status === "done").length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* Statistics Section */}
+      <div className="row mb-4">
+        <div className="col-md-3">
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#1d84e8b3", color: "white" }}>
+            <div className="card-body text-center">
+              <h6 className="card-title">Total Boards</h6>
+              <p className="h3 mb-0">{boardData.length}</p>
             </div>
           </div>
         </div>
-
-        {/* Charts and Table */}
-        <div className="col-12">
-          <div className="row">
-            {/* Pie Chart */}
-            <div className="col-md-6 mb-4">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#b4b4b41c", border: "none" }}>
-                <div className="card-body">
-                  <h5 className="card-title mb-4">Board Distribution</h5>
-                  <div className="d-flex justify-content-center">
-                    <PieChart width={400} height={300}>
-                      <Pie
-                        data={pieData}
-                        cx={200}
-                        cy={120}
-                        innerRadius={60}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </div>
-                </div>
-              </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#e8651dba", color: "white" }}>
+            <div className="card-body text-center">
+              <h6 className="card-title">Started</h6>
+              <p className="h3 mb-0">
+                {boardData.filter((board) => board.status === "started").length}
+              </p>
             </div>
-
-            {/* Boards Table */}
-            <div className="col-md-6 mb-4">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#f4f5f7", border: "none" }}>
-                <div className="card-body">
-                  <h5 className="card-title mb-4">Boards Information</h5>
-                  <div className="table-responsive">
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Board Name</th>
-                          <th>Status</th>
-                          
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {boardData.map((board) => (
-                          <tr key={board._id}>
-                            <td>{board.name}</td>
-                            <td>
-                              <span 
-                                className={`status-badge status-${board.status.toLowerCase()}`}
-                                style={{
-                                  padding: '4px 8px',
-                                  borderRadius: '12px',
-                                  fontSize: '0.85em',
-                                  backgroundColor: board.status === 'active' ? '#28a745' : 
-                                                board.status === 'started' ? '#007bff' : 
-                                                board.status === 'in-progress' ? '#ffc107' : 
-                                                board.status === 'done' ? '#6c757d' : '#dc3545',
-                                  color: 'white',
-                                  display: 'inline-block'
-                                }}
-                              >
-                                {board.status}
-                              </span>
-                            </td>
-                            
-                            <td>
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => handleViewBoard(board._id)}
-                                style={{
-                                  backgroundColor: '#4CAF50',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  padding: '4px 12px',
-                                  fontSize: '0.85em'
-                                }}
-                              >
-                                View Tasks
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </div>
-                </div>
-              </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#ff00008f", color: "white" }}>
+            <div className="card-body text-center">
+              <h6 className="card-title">In Progress</h6>
+              <p className="h3 mb-0">
+                {boardData.filter((board) => board.status === "in-progress").length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#861de8a6", color: "white" }}>
+            <div className="card-body text-center">
+              <h6 className="card-title">Done</h6>
+              <p className="h3 mb-0">
+                {boardData.filter((board) => board.status === "done").length}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <button 
-        className="floating-action-button" 
-        onClick={handleAddBoardClick}
-        style={{
-          position: 'fixed',
-          bottom: '30px',
-          right: '30px',
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          backgroundColor: '#4CAF50',
-          color: 'white',
-          border: 'none',
-          fontSize: '24px',
-          cursor: 'pointer',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'transform 0.2s ease',
-          zIndex: 1000
-        }}
-        onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-      >
-        +
-      </button>
+      <div className="row">
+        {/* Pie Chart */}
+        <div className="col-md-6">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">Board Distribution</h5>
+              <PieChart width={400} height={300}>
+                <Pie
+                  data={pieData}
+                  cx={200}
+                  cy={120}
+                  innerRadius={60}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </div>
+          </div>
+        </div>
+
+        {/* Boards Table */}
+        <div className="col-md-6">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">Boards Information</h5>
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>Board Name</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {boardData.map((board) => (
+                    <tr key={board._id}>
+                      <td>{board.name}</td>
+                      <td>
+                        <span
+                          style={{
+                            padding: "5px 10px",
+                            borderRadius: "12px",
+                            backgroundColor: "#28a745",
+                            color: "white",
+                          }}
+                        >
+                          {board.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", gap: "5px" }}>
+                          <Button className="action-button" size="sm" onClick={() => handleViewBoard(board._id)}>
+                            View
+                          </Button>
+                          <Button className="action-button" size="sm" onClick={() => handleEditBoard(board)}>
+                            Edit
+                          </Button>
+                          <Button className="action-button" size="sm" onClick={() => handleCloseBoard(board._id)}>
+                            Close
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<button className="floating-action-button" onClick={handleAddBoardClick}>
+  +
+</button>
+
+
+      {/* Edit Board Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Board</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error && <p className="text-danger">{error}</p>}
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Board Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={updatedName}
+                onChange={(e) => setUpdatedName(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                value={updatedDescription}
+                onChange={(e) => setUpdatedDescription(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

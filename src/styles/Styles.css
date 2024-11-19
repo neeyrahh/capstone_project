@@ -454,7 +454,7 @@ button .btn:hover {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background-color: #3d53db;
+  background-color: #1a2793;
   color: white;
   font-size: 24px;
   border: none;
@@ -466,10 +466,12 @@ button .btn:hover {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  
 }
 
 .floating-action-button:hover {
-  background-color: #1a2793;
+  background-color: #3d53db;
+  transform: scale(1.1);
 }
 .dragging-over {
   background-color: #f0f8ff;
@@ -782,4 +784,20 @@ span.task-icon-text {
   font-size: 1.2rem;
   text-align: center;
   padding: 2rem;
+}
+/* Apply Floating Button Colors to Action Buttons */
+.action-button {
+  background-color: #1a2793; 
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color:  #3d53db ;
 }
