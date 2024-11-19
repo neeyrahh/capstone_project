@@ -9,13 +9,11 @@ const Header = () => {
 
   const headerLinks = [
     { link: "/", text: "Home" },
-    // { link: "#about", text: "About" },
-    // { link: "#features", text: "Features" },
-    // { link: "#faq", text: "FAQ" },
+    
     ...(isAuthenticated
       ? [
           { link: "/dashboard", text: "Dashboard" },
-          { link: "/tasks", text: "Tasks" },
+         
           { link: "#", text: "Logout", onClick: logout },
         ]
       : [

@@ -73,7 +73,7 @@ const AddCardForm = () => {
         description,
         assign_to,
         dueDate: formattedDate,
-        position: 4
+        position: 1  // Set to 1 for "To Do" status
       });
 
       const response = await fetch('http://localhost:5000/api/card/create', {
@@ -88,7 +88,7 @@ const AddCardForm = () => {
           description,
           assign_to,
           dueDate: formattedDate,
-          position: 4
+          position: 1  // Changed to 1 for "To Do"
         })
       });
 
@@ -146,7 +146,7 @@ const AddCardForm = () => {
                       key={member.user_id} 
                       value={member.user_id}
                     >
-                      {member.email || member.user_id}
+                      {member.email}
                     </option>
                   ))}
                 </Form.Select>

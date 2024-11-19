@@ -4,16 +4,23 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from './Auth/AuthContext';
 import '../styles/Tasks.css';
 
-const INITIAL_LISTS = [
-  { ListID: 1, Name: 'To Do', cards: [] },
-  { ListID: 2, Name: 'In Progress', cards: [] },
-  { ListID: 3, Name: 'Completed', cards: [] },
-  { ListID: 4, Name: 'Approved', cards: [] }
+// Lists configuration
+const LIST_CONFIG = [
+  { ListID: 1, Name: 'To Do', position: 1 },
+  { ListID: 2, Name: 'In Progress', position: 2 },
+  { ListID: 3, Name: 'Completed', position: 3 },
+  { ListID: 4, Name: 'Approved', position: 4 }
 ];
 
 const Tasks = () => {
   const { boardId } = useParams();
-  const [lists, setLists] = useState(INITIAL_LISTS);
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  
+  // State declarations
+  const [lists, setLists] = useState(LIST_CONFIG.map(list => ({ ...list, cards: [] })));
+  const [boardMembers, setBoardMembers] = useState([]);
+  const [boardName, setBoardName] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -21,38 +28,34 @@ const Tasks = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [boardName, setBoardName] = useState('');
-  const [boardMembers, setBoardMembers] = useState([]);
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
-  // Define fetchBoardMembers using useCallback
+  // Fetch board members
   const fetchBoardMembers = useCallback(async () => {
     try {
-      const membersResponse = await fetch(
+      const response = await fetch(
         `http://localhost:5000/api/board-members/${boardId}`,
         {
           credentials: 'include'
         }
       );
 
-      if (!membersResponse.ok) {
+      if (!response.ok) {
         throw new Error('Failed to fetch board members');
       }
 
-      const data = await membersResponse.json();
-      console.log('Board members data:', data); // Debug log
+      const data = await response.json();
+     
       
       if (data && data.board_members && Array.isArray(data.board_members)) {
         setBoardMembers(data.board_members);
       }
     } catch (err) {
-      console.error('Error fetching board members:', err);
+      
       setModalError('Failed to load board members');
     }
   }, [boardId]);
 
-  // Define fetchBoardDetails using useCallback
+  // Fetch board details
   const fetchBoardDetails = useCallback(async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/board/${boardId}`, {
@@ -66,12 +69,12 @@ const Tasks = () => {
       const data = await response.json();
       setBoardName(data.board.name);
     } catch (err) {
-      console.error('Error fetching board details:', err);
+    
       setError('Failed to load board details');
     }
   }, [boardId]);
 
-  // Define fetchCards using useCallback
+  // Fetch cards
   const fetchCards = useCallback(async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/cards/${boardId}`, {
@@ -83,24 +86,28 @@ const Tasks = () => {
       }
 
       const data = await response.json();
-      console.log('Cards data:', data); // Debug log
+    
       
-      if (data && Array.isArray(data.cards)) {
-        const updatedLists = INITIAL_LISTS.map(list => ({
+      // Transform the data structure to match our needs
+      const updatedLists = LIST_CONFIG.map(list => {
+        const positionCards = data[list.position] || [];
+        return {
           ...list,
-          cards: data.cards.filter(card => card.status === list.Name) || []
-        }));
-        setLists(updatedLists);
-      }
+          cards: Array.isArray(positionCards) ? positionCards : []
+        };
+      });
+
+      
+      setLists(updatedLists);
     } catch (err) {
-      console.error('Error fetching cards:', err);
+     
       setError('Failed to load cards');
     } finally {
       setLoading(false);
     }
   }, [boardId]);
 
-  // Main useEffect for initial data loading
+  // Initial data load
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -117,7 +124,7 @@ const Tasks = () => {
           fetchBoardMembers()
         ]);
       } catch (err) {
-        console.error('Error loading initial data:', err);
+        
         setError('Failed to load board data');
       } finally {
         setLoading(false);
@@ -127,6 +134,7 @@ const Tasks = () => {
     loadInitialData();
   }, [isAuthenticated, navigate, fetchBoardDetails, fetchCards, fetchBoardMembers]);
 
+  // Event handlers
   const handleAddCard = () => {
     navigate(`/tasks/${boardId}/add`);
   };
@@ -164,23 +172,24 @@ const Tasks = () => {
       });
 
       const data = await response.json();
-      console.log('Invite response:', data); // Debug log
+     
 
       if (response.ok) {
         setSuccess('Member invited successfully!');
-        await fetchBoardMembers(); // Refresh the members list
+        await fetchBoardMembers();
         setEmail('');
       } else {
         throw new Error(data.msg || 'Failed to invite member');
       }
     } catch (err) {
-      console.error('Invitation error:', err);
+    
       setModalError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Loading state
   if (loading) {
     return (
       <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
@@ -194,6 +203,7 @@ const Tasks = () => {
     );
   }
 
+  // Main render
   return (
     <Container fluid className="tasks-container p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -213,19 +223,44 @@ const Tasks = () => {
         {lists.map(list => (
           <Col key={list.ListID} md={3} className="mb-4">
             <div className="task-list">
-              <h5 className="list-title text-center mb-3">{list.Name}</h5>
+              <h5 className="list-title text-center mb-3">
+                {list.Name}
+                <span className="badge bg-secondary ms-2">
+                  {list.cards.length}
+                </span>
+              </h5>
               {list.cards.map(card => (
-                <Link key={card._id} to={`/task/${boardId}/${card._id}`} style={{ textDecoration: 'none' }}>
+                <Link 
+                  key={card._id} 
+                  to={`/task/${boardId}/${card._id}`} 
+                  style={{ textDecoration: 'none' }}
+                >
                   <Card className="task-card mb-3 shadow-sm">
                     <Card.Body>
-                      <Card.Title className="task-title">{card.title}</Card.Title>
+                      <Card.Title className="task-title">
+                        {card.title}
+                      </Card.Title>
                       <Card.Text>
-                        <small><strong>Assigned to: </strong> 
+                        <small className="d-block mb-1">
+                          <strong>Assigned to: </strong> 
                           {boardMembers.find(m => m.user_id === card.assign_to)?.email || card.assign_to}
-                        </small><br />
-                        <small><strong>Due Date: </strong> 
-                          {new Date(card.dueDate).toLocaleDateString()}
                         </small>
+                        <small className="d-block">
+                          <strong>Due Date: </strong> 
+                          {new Date(card.dueDate).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </small>
+                        {card.description && (
+                          <small className="d-block mt-2 text-muted description-text">
+                            {card.description.length > 100 
+                              ? `${card.description.substring(0, 100)}...` 
+                              : card.description
+                            }
+                          </small>
+                        )}
                       </Card.Text>
                     </Card.Body>
                   </Card>
@@ -243,7 +278,6 @@ const Tasks = () => {
         ))}
       </Row>
 
-      {/* Invite Member Modal */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>Invite Member</Modal.Title>
@@ -279,12 +313,11 @@ const Tasks = () => {
             </div>
           </Form>
           
-          {/* Display current board members */}
           {boardMembers.length > 0 && (
             <div className="mt-4">
               <h6>Current Board Members:</h6>
               <ul className="list-unstyled">
-                {boardMembers.map((member, index) => (
+                {boardMembers.map((member) => (
                   <li key={member.user_id} className="text-muted">
                     {member.email || member.user_id}
                   </li>

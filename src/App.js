@@ -12,7 +12,8 @@ import Dashboard from "./components/Dashboard";
 import Hompage from "./components/Hompage";
 import Forget from "./components/Forget-password";
 import AddBoardForm from "./components/AddBoardForm";
-import AddCardForm from "./components/AddCardForm"; // Import the AddCardForm component
+import AddCardForm from "./components/AddCardForm";
+import EditCard from "./components/Edittask";
 
 const router = createBrowserRouter([
   {
@@ -32,13 +33,22 @@ const router = createBrowserRouter([
         path: "/tasks/:boardId", 
         element: (
           <ProtectedRoute>
-            <Tasks />
+            <Tasks/>
             
           </ProtectedRoute>
         ),
       },
       {
-        path: "/task/:cardId",
+        path: "/task/:boardId/:cardId/edit", 
+        element: (
+          <ProtectedRoute>
+            <EditCard/>
+            
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/task/:boardId/:cardId",
         element: (
           <ProtectedRoute>
             <TaskDetails />

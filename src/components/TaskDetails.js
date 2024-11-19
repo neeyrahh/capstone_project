@@ -1,176 +1,269 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FaUser, FaTag, FaBell, FaListAlt, FaCheckSquare } from 'react-icons/fa';
 import '../styles/Styles.css';
 
-const mockTasks = [
-  {
-    CardID: 1,
-    Title: 'Design MongoDB collections',
-    Description: 'Design the necessary collections in MongoDB for storing users, tasks, and boards. Define relationships between collections using references.',
-    Priority: 'High',
-    AssignedTo: 'Naznin',
-    DueDate: '2024-10-05',
-    Status: 'In Progress',
-    Checklist: [
-      { id: 1, text: 'Create Users collection schema', completed: true },
-      { id: 2, text: 'Create Tasks collection schema', completed: true },
-      { id: 3, text: 'Create Boards collection schema and set up relationships', completed: true },
-    ]
-  },
-];
-
 const TaskDetails = () => {
-  const { cardId } = useParams();
+  const { boardId, cardId } = useParams();
+  const navigate = useNavigate();
   const [task, setTask] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [assignedUser, setAssignedUser] = useState(null);
+  const [checklist, setChecklist] = useState([
+    { id: 1, text: 'Review requirements', completed: false },
+    { id: 2, text: 'Implementation', completed: false },
+    { id: 3, text: 'Testing', completed: false },
+    { id: 4, text: 'Documentation', completed: false }
+  ]);
 
-  useEffect(() => {
-    const selectedTask = mockTasks.find(task => task.CardID === parseInt(cardId));
-    setTask(selectedTask);
+  const fetchCardDetails = useCallback(async () => {
+    try {
+      
+      const response = await fetch(`http://localhost:5000/api/card/${cardId}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch card details');
+      }
+
+      const data = await response.json();
+     
+      setTask(data.card || data); // Handle both possible response formats
+
+    } catch (err) {
+     
+      setError('Failed to load task details');
+    } finally {
+      setLoading(false);
+    }
   }, [cardId]);
 
-  if (!task) {
+  useEffect(() => {
+    fetchCardDetails();
+  }, [fetchCardDetails]);
+
+  const handleChecklistToggle = (itemId) => {
+    setChecklist(prevChecklist =>
+      prevChecklist.map(item =>
+        item.id === itemId ? { ...item, completed: !item.completed } : item
+      )
+    );
+  };
+
+  const calculateProgress = () => {
+    const completedItems = checklist.filter(item => item.completed).length;
+    return (completedItems / checklist.length) * 100;
+  };
+ 
+  const handleDeleteCard = async () => {
+    if (window.confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+      try {
+        setLoading(true);
+      
+        
+        // NOTE: Updated URL format based on your backend API structure
+        const url = `http://localhost:5000/api/card/${cardId}`;
+       
+
+        const response = await fetch(url, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+      
+
+        // Check if response is JSON
+        const contentType = response.headers.get("content-type");
+        let data;
+        if (contentType && contentType.includes("application/json")) {
+          data = await response.json();
+         
+        }
+
+        if (response.ok) {
+          alert('Card deleted successfully!');
+          navigate(`/tasks/${boardId}`);
+        } else {
+          // More specific error messages based on status
+          switch (response.status) {
+            case 404:
+              throw new Error('Card not found. It may have been already deleted.');
+            case 401:
+              throw new Error('You are not authorized to delete this card.');
+            case 403:
+              throw new Error('You do not have permission to delete this card.');
+            default:
+              throw new Error(data?.msg || 'Failed to delete card. Please try again.');
+          }
+        }
+      } catch (err) {
+        
+        setError(err.message || 'Failed to delete task. Please try again.');
+        setLoading(false);
+      }
+    }
+  };
+
+  // Add this log to verify the cardId and boardId
+  useEffect(() => {
+    
+  }, [cardId, boardId]);
+  if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  const completedItems = task.Checklist.filter(item => item.completed).length;
-  const progress = (completedItems / task.Checklist.length) * 100;
+  if (error) {
+    return (
+      <div className="task-details-container">
+        <div className="error-message">{error}</div>
+        <button className="button-primary" 
+        onClick={() => navigate(`/tasks/${boardId}`)}
+        >
+          Back to Board
+        </button>
+      </div>
+    );
+  }
+
+  if (!task) {
+    return (
+      <div className="task-details-container">
+        <div className="error-message">Task not found</div>
+        <button className="button-primary" onClick={() => navigate(`/tasks/${boardId}`)}>
+          Back to Board
+        </button>
+      </div>
+    );
+  }
+
+  const getStatusFromPosition = (position) => {
+    switch (Number(position)) {
+      case 1: return 'To Do';
+      case 2: return 'In Progress';
+      case 3: return 'Completed';
+      case 4: return 'Approved';
+      default: return 'Unknown';
+    }
+  };
+
+  const getStatusClass = (position) => {
+    switch (Number(position)) {
+      case 1: return 'to-do';
+      case 2: return 'in-progress';
+      case 3: return 'completed';
+      case 4: return 'approved';
+      default: return '';
+    }
+  };
 
   return (
     <div className="task-details-container">
       <div className="task-header">
-        <h1 className="task-title">{task.Title}</h1>
-        <span className={`status-label ${task.Status.toLowerCase()}`}>{task.Status}</span>
+        <h1 className="task-title">{task.title}</h1>
+        <span className={`status-label ${getStatusClass(task.position)}`}>
+          {getStatusFromPosition(task.position)}
+        </span>
       </div>
       
       <div className="task-info">
+        {/* <div className="task-info-item">
+          <FaUser className="task-icon" /> 
+          <span className='task-icon-text'>
+            {assignedUser ? assignedUser.email : task.assign_to}
+          </span>
+        </div> */}
         <div className="task-info-item">
-          <FaUser className="task-icon" /> <span className='task-icon-text'>{task.AssignedTo}</span>
+          <FaTag className="task-icon" /> 
+          <span className='task-icon-text'>
+            {getStatusFromPosition(task.position)}
+          </span>
         </div>
         <div className="task-info-item">
-          <FaTag className="task-icon" /> <span className='task-icon-text'>{task.Priority}</span>
-        </div>
-        <div className="task-info-item">
-          <FaBell className="task-icon" /> <span className='task-icon-text'>Watch</span>
+          <FaBell className="task-icon" /> 
+          <span className='task-icon-text'>
+            Due: {new Date(task.dueDate).toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })}
+          </span>
         </div>
       </div>
 
       <div className="task-section">
-        <h3 className="task-section-title"><FaListAlt className="section-icon" /> Description</h3>
-        <p className="task-description">{task.Description}</p>
+        <h3 className="task-section-title">
+          <FaListAlt className="section-icon" /> Description
+        </h3>
+        <p className="task-description">{task.description}</p>
       </div>
 
       <div className="task-section">
-        <h3 className="task-section-title"><FaCheckSquare className="section-icon" /> Checklist</h3>
-        <div className="progress-bar-container">
-            <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+        <h3 className="task-section-title">
+          <FaCheckSquare className="section-icon" /> Checklist
+        </h3>
+        <div className="checklist-header">
+          <div className="checklist-progress">
+            {Math.round(calculateProgress())}%
           </div>
+        </div>
+        <div className="progress-bar-container">
+          <div 
+            className="progress-bar" 
+            style={{ width: `${calculateProgress()}%` }}
+          ></div>
+        </div>
         <div className="checklist">
-          {task.Checklist.map(item => (
+          {checklist.map(item => (
             <div key={item.id} className="checklist-item">
-              <input type="checkbox" className="checklist-checkbox" checked={item.completed} readOnly />
-              <span className={item.completed ? 'completed' : ''}>{item.text}</span>
+              <input
+                type="checkbox"
+                checked={item.completed}
+                onChange={() => handleChecklistToggle(item.id)}
+                className="checklist-checkbox"
+              />
+              <span className={item.completed ? 'completed' : ''}>
+                {item.text}
+              </span>
             </div>
           ))}
         </div>
-        {/* <button className="add-item-button">Add an item</button> */}
       </div>
 
       <div className="task-actions">
-        <button className="button-primary">Edit</button>
-        {/* <button className="button-secondary">Hide checked items</button> */}
-        <button className="button-danger">Delete</button>
+      <button 
+        className="button-primary"
+        // onClick={() => navigate(`/task/${boardId}/${cardId}/edit`)}
+        disabled={loading}
+      >
+        Edit
+      </button>
+      <button 
+        className="button-primary"
+        onClick={() => navigate(`/tasks/${boardId}`)}
+        disabled={loading}
+      >
+        Back to Board
+      </button>
+      <button 
+        className="button-danger"
+        // onClick={handleDeleteCard}
+        disabled={loading}
+      >
+        {loading ? 'Deleting...' : 'Delete'}
+      </button>
+    </div>
+    {error && (
+      <div className="error-message mt-3">
+        {error}
       </div>
+    )}
     </div>
   );
 };
 
 export default TaskDetails;
-
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import { useParams } from 'react-router-dom';
-// import '../styles/TaskDetails.css';
-
-// // Mock data for task details
-// const mockTasks = [
-//   {
-//     CardID: 1,
-//     Title: 'Implement Task Details Screen',
-//     Description: 'Create the Task Details screen where users can view more information.',
-//     Priority: 'High',
-//     AssignedTo: 'Naznin',
-//     DueDate: '2024-10-05',
-//     Status: 'In Progress',
-//     Checklist: [
-//       { id: 1, text: 'Implement the design in React', completed: true },
-//       { id: 2, text: 'Add buttons for actions like "Edit Task" and "Delete Task"', completed: true },
-//       { id: 3, text: 'Test the responsiveness', completed: false },
-//       { id: 4, text: 'Collaborate with the backend team', completed: false }
-//     ]
-//   },
-// ];
-
-// const TaskDetails = () => {
-//   const { cardId } = useParams();
-//   const [task, setTask] = useState(null);
-
-//   useEffect(() => {
-//     const selectedTask = mockTasks.find(task => task.CardID === parseInt(cardId));
-//     setTask(selectedTask);
-//   }, [cardId]);
-
-//   if (!task) {
-//     return <div>Loading...</div>;
-//   }
-
-//   const completedItems = task.Checklist.filter(item => item.completed).length;
-//   const progress = (completedItems / task.Checklist.length) * 100;
-
-//   return (
-//     <div className="task-details-container">
-//       <h1 className="task-title">{task.Title}</h1>
-      
-//       <div className="task-section">
-//         <h3 className="task-section-title">Description</h3>
-//         <div className="task-section-content">
-//           <p>{task.Description}</p>
-//         </div>
-//       </div>
-      
-//       <div className="task-section">
-//         <h3 className="task-section-title">Details</h3>
-//         <div className="task-section-content">
-//           <p><strong>Assigned To:</strong> {task.AssignedTo}</p>
-//           <p><strong>Due Date:</strong> {task.DueDate}</p>
-//           <p><strong>Status:</strong> <span className="label">{task.Status}</span></p>
-//           <p><strong>Priority:</strong> <span className="label">{task.Priority}</span></p>
-//         </div>
-//       </div>
-
-//       <div className="task-section">
-//         <h3 className="task-section-title">Checklist</h3>
-//         <div className="task-section-content">
-//           {task.Checklist.map(item => (
-//             <div key={item.id} className="checklist-item">
-//               <input type="checkbox" className="checklist-checkbox" checked={item.completed} readOnly />
-//               <span>{item.text}</span>
-//             </div>
-//           ))}
-//           <div className="progress-bar-container">
-//             <div className="progress-bar" style={{ width: `${progress}%` }}></div>
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="task-actions">
-//         <button className="button-primary">Edit Task</button>
-//         <button className="button-danger">Delete Task</button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TaskDetails;
