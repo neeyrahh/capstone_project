@@ -5,7 +5,7 @@ import { Table, Button, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import '../styles/Styles.css';
 
-const COLORS = ["#2996ff", "#e8651d", "#ff0000b3", "#861de8e3", "#9a1de8"];
+const COLORS = ["#bac8ff", "#3d53db", "#2a3bb7", "#1a2793", "#1a2793"];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container p-4">
-      <h1 className="mb-3">Dashboard</h1>
+      <h2 className="dash-heading">Dashboard</h2>
       <p className="lead mb-4">
         Below is the overview of your boards. Manage your boards effectively.
       </p>
@@ -152,17 +152,17 @@ const Dashboard = () => {
       {/* Statistics Section */}
       <div className="row mb-4">
         <div className="col-md-3">
-          <div className="card shadow-sm h-100" style={{ backgroundColor: "#1d84e8b3", color: "white" }}>
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
             <div className="card-body text-center">
-              <h6 className="card-title">Total Boards</h6>
+              <h6 className="stat-title">Total Boards</h6>
               <p className="h3 mb-0">{boardData.length}</p>
             </div>
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card shadow-sm h-100" style={{ backgroundColor: "#e8651dba", color: "white" }}>
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
             <div className="card-body text-center">
-              <h6 className="card-title">Started</h6>
+              <h6 className="stat-title">Started</h6>
               <p className="h3 mb-0">
                 {boardData.filter((board) => board.status === "started").length}
               </p>
@@ -170,9 +170,9 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card shadow-sm h-100" style={{ backgroundColor: "#ff00008f", color: "white" }}>
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
             <div className="card-body text-center">
-              <h6 className="card-title">In Progress</h6>
+              <h6 className="stat-title">In Progress</h6>
               <p className="h3 mb-0">
                 {boardData.filter((board) => board.status === "in-progress").length}
               </p>
@@ -180,9 +180,9 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card shadow-sm h-100" style={{ backgroundColor: "#861de8a6", color: "white" }}>
+          <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
             <div className="card-body text-center">
-              <h6 className="card-title">Done</h6>
+              <h6 className="stat-title">Done</h6>
               <p className="h3 mb-0">
                 {boardData.filter((board) => board.status === "done").length}
               </p>
@@ -225,7 +225,7 @@ const Dashboard = () => {
             <div className="card-body">
               <h5 className="card-title">Boards Information</h5>
               <Table striped bordered hover>
-                <thead>
+                <thead className="board">
                   <tr>
                     <th>Board Name</th>
                     <th>Status</th>
@@ -237,14 +237,7 @@ const Dashboard = () => {
                     <tr key={board._id}>
                       <td>{board.name}</td>
                       <td>
-                        <span
-                          style={{
-                            padding: "5px 10px",
-                            borderRadius: "12px",
-                            backgroundColor: "#28a745",
-                            color: "white",
-                          }}
-                        >
+                        <span className="dash-status">
                           {board.status}
                         </span>
                       </td>
