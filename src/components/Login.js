@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import Confetti from "react-confetti"; 
+import Confetti from "react-confetti";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useAuth } from './Auth/AuthContext';
+import { useAuth } from "./Auth/AuthContext";
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [confetti, setConfetti] = useState(false);
-  const [error, setError] = useState(''); // Add error state
+  const [error, setError] = useState(""); // Add error state
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -22,13 +22,13 @@ const LoginSignup = () => {
 
   const toggleForms = () => {
     setIsLogin(!isLogin);
-    setError(''); // Clear error when toggling forms
+    setError(""); // Clear error when toggling forms
     reset();
   };
 
   const onSubmit = async (data) => {
-    setError('');
-  
+    setError("");
+
     const payload = isLogin
       ? {
           email: data.email,
@@ -53,12 +53,12 @@ const LoginSignup = () => {
       });
 
       const result = await response.json();
-  
+
       if (response.ok) {
         console.log("Success:", result);
 
         if (isLogin) {
-          sessionStorage.setItem('userId', result.userId); // Ensure this is used as needed
+          sessionStorage.setItem("userId", result.userId); // Ensure this is used as needed
           login(); // Existing login function
           navigate("/dashboard");
         } else {
@@ -76,7 +76,7 @@ const LoginSignup = () => {
       setError("Unable to reach the server. Please try again later.");
     }
   };
-  
+
   return (
     <div className="form-container">
       {confetti && <Confetti />}
@@ -114,50 +114,54 @@ const LoginSignup = () => {
           )}
           <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
             <h2>{isLogin ? "Login" : "Sign Up"}</h2>
-            <div className="form-group">
-              <label htmlFor="email">
-                Email
-                {errors.email && (
-                  <span className="invalid-feedback d-block">
-                    {errors.email.message}
-                  </span>
-                )}
-              </label>
-              <input
-                className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                type="email"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-                    message: "Invalid email format",
-                  },
-                })}
-                placeholder="Enter your email"
-              />
-            </div>
+            <div className="form-body">
+              <div className="form-group">
+                <label htmlFor="email">
+                  Email
+                  {errors.email && (
+                    <span className="invalid-feedback d-block">
+                      {errors.email.message}
+                    </span>
+                  )}
+                </label>
+                <input
+                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                      message: "Invalid email format",
+                    },
+                  })}
+                  placeholder="Enter your email"
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="password">
-                Password
-                {errors.password && (
-                  <span className="invalid-feedback d-block">
-                    {errors.password.message}
-                  </span>
-                )}
-              </label>
-              <input
-                className={`form-control ${errors.password ? "is-invalid" : ""}`}
-                type="password"
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters long",
-                  },
-                })}
-                placeholder="Enter your password"
-              />
+              <div className="form-group">
+                <label htmlFor="password">
+                  Password
+                  {errors.password && (
+                    <span className="invalid-feedback d-block">
+                      {errors.password.message}
+                    </span>
+                  )}
+                </label>
+                <input
+                  className={`form-control ${
+                    errors.password ? "is-invalid" : ""
+                  }`}
+                  type="password"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters long",
+                    },
+                  })}
+                  placeholder="Enter your password"
+                />
+              </div>
             </div>
 
             {!isLogin && (
@@ -172,7 +176,9 @@ const LoginSignup = () => {
                     )}
                   </label>
                   <input
-                    className={`form-control ${errors.confirmpassword ? "is-invalid" : ""}`}
+                    className={`form-control ${
+                      errors.confirmpassword ? "is-invalid" : ""
+                    }`}
                     type="password"
                     {...register("confirmpassword", {
                       required: "Confirm password is required",
@@ -192,7 +198,9 @@ const LoginSignup = () => {
                     )}
                   </label>
                   <input
-                    className={`form-control ${errors.fullname ? "is-invalid" : ""}`}
+                    className={`form-control ${
+                      errors.fullname ? "is-invalid" : ""
+                    }`}
                     type="text"
                     {...register("fullname", {
                       required: "Full name is required",
@@ -203,7 +211,7 @@ const LoginSignup = () => {
               </>
             )}
 
-            <button type="submit" className="btn btn-primary w-100 mt-3">
+            <button type="submit" className="btn btn-primary">
               {isLogin ? "Login" : "Sign Up"}
             </button>
           </form>

@@ -268,6 +268,10 @@ input {
   outline: none;
 }
 
+.form-body {
+  margin: 1.2rem 0;
+}
+
 .form-signin,
 .form-signup {
   width: 430px;
@@ -310,6 +314,8 @@ button .btn:hover {
   color: var(--input-background);
   background-color: var(--primary-dark-alt);
 }
+
+
 
 /* Responsive section */
 @media only screen and (max-width: 768px) {
@@ -447,6 +453,91 @@ button .btn:hover {
 
 .form-control {
   width: 100%;
+}
+
+/* dashboard */
+.card {
+  border: none;
+ --bs-card-border-color: var(--primary-default);
+}
+
+.card-body.text-center {
+  border: 0.35px solid var(--primary-default) !important;
+  border-radius: 2px;
+}
+
+.card-body {
+  flex: 1 1 auto;
+  padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
+  color: var(--bs-card-color);
+  padding: 1.2rem 2rem;
+}
+
+.recharts-wrapper {
+  position: relative;
+  cursor: default;
+  width: 100% !important;
+  height: 300px;
+}
+
+.recharts-legend-wrapper {
+  width: 100% !important;
+}
+
+ul.recharts-default-legend {
+  width: 100% !important;
+}
+
+h2.dash-heading {
+    font-size: 2.4rem;
+    color: var(--primary-dark);
+    font-weight: var(--font-weight-regular);
+}
+
+.mb-4{
+  margin-bottom: 3rem !important;
+  font-size: var(--font-size-medium) !important;
+  font-weight: 300 !important;
+  /* margin-top: 6rem !important; */
+  color: var(--body-text) !important;
+}
+
+thead.board-heading {
+  border-radius: 0;
+  font-size: var(--font-size-medium);
+  color: var(--primary-dark);
+}
+
+th {
+  font-weight: 400;
+}
+
+td {
+  margin-bottom: 1.5rem !important;
+  font-size: var(--font-size-regular) !important;
+  font-weight: 300 !important;
+  color: var(--body-text) !important;
+  text-transform: capitalize;
+}
+
+span.dash-status {
+  color: rgb(40, 167, 69);
+  font-size: 0.89rem;
+}
+
+.card-title {
+  margin-bottom: var(--bs-card-title-spacer-y);
+  color: var(--bs-card-title-color);
+  margin-bottom: 1.2rem;
+}
+
+button.action-button.btn.btn-primary.btn-sm {
+  margin-top: 0;
+  margin-top: 0;
+  padding: 3px;
+  font-size: 0.80rem;
+  font-weight: 300;
+  border-radius: 2px;
 }
 
 /*floating button*/
