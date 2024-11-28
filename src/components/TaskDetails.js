@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaUser, FaTag, FaBell, FaListAlt, FaCheckSquare } from 'react-icons/fa';
+import {  FaTag, FaBell, FaListAlt, FaCheckSquare } from 'react-icons/fa';
 import '../styles/Styles.css';
+import { API_BASE_URL } from './Config';
 
 const TaskDetails = () => {
   const { boardId, cardId } = useParams();
@@ -9,7 +10,6 @@ const TaskDetails = () => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [assignedUser, setAssignedUser] = useState(null);
   const [checklist, setChecklist] = useState([
     { id: 1, text: 'Review requirements', completed: false },
     { id: 2, text: 'Implementation', completed: false },
@@ -20,7 +20,7 @@ const TaskDetails = () => {
   const fetchCardDetails = useCallback(async () => {
     try {
       
-      const response = await fetch(`http://localhost:5000/api/card/${cardId}`, {
+      const response = await fetch(`${API_BASE_URL}/card/${cardId}`, {
         credentials: 'include'
       });
 
@@ -58,56 +58,25 @@ const TaskDetails = () => {
   };
  
   const handleDeleteCard = async () => {
-    if (window.confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
-      try {
-        setLoading(true);
-      
-        
-        // NOTE: Updated URL format based on your backend API structure
-        const url = `http://localhost:5000/api/card/${cardId}`;
-       
-
-        const response = await fetch(url, {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-      
-
-        // Check if response is JSON
-        const contentType = response.headers.get("content-type");
-        let data;
-        if (contentType && contentType.includes("application/json")) {
-          data = await response.json();
-         
-        }
-
-        if (response.ok) {
-          alert('Card deleted successfully!');
-          navigate(`/tasks/${boardId}`);
-        } else {
-          // More specific error messages based on status
-          switch (response.status) {
-            case 404:
-              throw new Error('Card not found. It may have been already deleted.');
-            case 401:
-              throw new Error('You are not authorized to delete this card.');
-            case 403:
-              throw new Error('You do not have permission to delete this card.');
-            default:
-              throw new Error(data?.msg || 'Failed to delete card. Please try again.');
-          }
-        }
-      } catch (err) {
-        
-        setError(err.message || 'Failed to delete task. Please try again.');
-        setLoading(false);
+    try {
+      const response = await fetch(`${API_BASE_URL}/card/delete/${cardId}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+  
+      if (!response.ok) {
+        const errorMsg = (await response.json()).msg || 'Unknown error';
+        throw new Error(errorMsg);
       }
+  
+      alert("Card deleted successfully!");
+      navigate(`/tasks/${boardId}`);
+    } catch (error) {
+      console.error("Delete Error:", error);
+      setError(error.message || "Failed to delete card.");
     }
   };
+  
 
   // Add this log to verify the cardId and boardId
   useEffect(() => {
@@ -237,7 +206,7 @@ const TaskDetails = () => {
       <div className="task-actions">
       <button 
         className="button-primary"
-        // onClick={() => navigate(`/task/${boardId}/${cardId}/edit`)}
+        onClick={() => navigate(`/task/${boardId}/${cardId}/edit`)}
         disabled={loading}
       >
         Edit
@@ -251,7 +220,7 @@ const TaskDetails = () => {
       </button>
       <button 
         className="button-danger"
-        // onClick={handleDeleteCard}
+        onClick={handleDeleteCard}
         disabled={loading}
       >
         {loading ? 'Deleting...' : 'Delete'}

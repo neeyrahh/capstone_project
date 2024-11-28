@@ -3,6 +3,7 @@ import { Row, Col, Container, Card, Button, Modal, Form, Alert } from 'react-boo
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from './Auth/AuthContext';
 import '../styles/Tasks.css';
+import { API_BASE_URL } from './Config';
 
 // Lists configuration
 const LIST_CONFIG = [
@@ -33,7 +34,7 @@ const Tasks = () => {
   const fetchBoardMembers = useCallback(async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/board-members/${boardId}`,
+        `/board-members/${boardId}`,
         {
           credentials: 'include'
         }
@@ -58,7 +59,7 @@ const Tasks = () => {
   // Fetch board details
   const fetchBoardDetails = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/board/${boardId}`, {
+      const response = await fetch(`${API_BASE_URL}/board/${boardId}`, {
         credentials: 'include'
       });
       
@@ -77,7 +78,7 @@ const Tasks = () => {
   // Fetch cards
   const fetchCards = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/cards/${boardId}`, {
+      const response = await fetch(`${API_BASE_URL}/cards/${boardId}`, {
         credentials: 'include'
       });
 
@@ -159,7 +160,7 @@ const Tasks = () => {
     setSuccess('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/board-member/create', {
+      const response = await fetch(`${API_BASE_URL}/board-member/create`, {
         method: 'POST',
         credentials: 'include',
         headers: {

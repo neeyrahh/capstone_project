@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Confetti from "react-confetti";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useAuth } from "./Auth/AuthContext";
+import { API_BASE_URL } from "./Config";
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,7 +23,7 @@ const LoginSignup = () => {
 
   const toggleForms = () => {
     setIsLogin(!isLogin);
-    setError(""); // Clear error when toggling forms
+    setError(""); 
     reset();
   };
 
@@ -41,8 +42,8 @@ const LoginSignup = () => {
         };
 
     const url = isLogin
-      ? "http://localhost:5000/api/auth/login" // Updated to backend port
-      : "http://localhost:5000/api/auth/register";
+      ? `${API_BASE_URL}/auth/login` // Updated to backend port
+      : `${API_BASE_URL}/auth/register`;
 
     try {
       const response = await fetch(url, {

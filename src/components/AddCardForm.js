@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Alert, Container, Form, Button } from 'react-bootstrap';
+import { API_BASE_URL } from './Config';
 
 const AddCardForm = () => {
   const { boardId } = useParams();
@@ -18,7 +19,7 @@ const AddCardForm = () => {
     setLoadingMembers(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/board-members/${boardId}`,
+        `${API_BASE_URL}/board-members/${boardId}`,
         {
           credentials: 'include'
         }
@@ -29,20 +30,20 @@ const AddCardForm = () => {
       }
 
       const data = await response.json();
-      console.log('Board members data:', data);
+      
       
       // Check if the response has board_members array
       if (data && data.board_members && Array.isArray(data.board_members)) {
         setBoardMembers(data.board_members);
       } else if (Array.isArray(data)) {
-        // If the response is directly an array
+        
         setBoardMembers(data);
       } else {
-        console.error('Unexpected data format:', data);
+        
         throw new Error('Invalid board members data format');
       }
     } catch (err) {
-      console.error('Error fetching board members:', err);
+     
       setError('Failed to load board members. Please try again.');
       setBoardMembers([]);
     } finally {
@@ -67,16 +68,9 @@ const AddCardForm = () => {
     try {
       const formattedDate = new Date(dueDate).toISOString();
 
-      console.log('Submitting card with data:', {
-        boardId,
-        title,
-        description,
-        assign_to,
-        dueDate: formattedDate,
-        position: 1  // Set to 1 for "To Do" status
-      });
+      
 
-      const response = await fetch('http://localhost:5000/api/card/create', {
+      const response = await fetch(`${API_BASE_URL}/card/create`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -93,8 +87,6 @@ const AddCardForm = () => {
       });
 
       const data = await response.json();
-      console.log('Card creation response:', data);
-
       if (!response.ok) {
         throw new Error(data.msg || 'Failed to create card');
       }
@@ -102,7 +94,7 @@ const AddCardForm = () => {
       // Navigate back to the board's tasks view
       navigate(`/tasks/${boardId}`);
     } catch (err) {
-      console.error('Error creating card:', err);
+      
       setError(err.message || 'Failed to create card. Please try again.');
     } finally {
       setLoading(false);

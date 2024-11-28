@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../styles/Styles.css';
+import { API_BASE_URL } from './Config';
 
 const EditCard = () => {
   const { boardId, cardId } = useParams();
@@ -12,44 +13,76 @@ const EditCard = () => {
     title: '',
     description: '',
     dueDate: '',
-    position: ''
+    position: '',
+    assign_to: '' // New field for assignment
   });
+  const [boardMembers, setBoardMembers] = useState([]); 
 
   const fetchCardDetails = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/card/${cardId}`, {
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch card details');
-      }
-
-      const data = await response.json();
-      console.log('Card data:', data);
       
-      // Format the date for the datetime-local input
-      const formattedDate = new Date(data.dueDate)
-        .toISOString()
-        .slice(0, 16); // Format: YYYY-MM-DDTHH:mm
-
-      setFormData({
-        title: data.title || '',
-        description: data.description || '',
-        dueDate: formattedDate,
-        position: data.position || '1'
+      const response = await fetch(`/card/${cardId}`, {
+        credentials: 'include',
       });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to fetch card details. Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      
+  
+      // Check if the data structure is what you expect
+      if (data && data.card) {
+        const formattedDate = new Date(data.card.dueDate).toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+  
+        setFormData({
+          title: data.card.title || '',
+          description: data.card.description || '',
+          dueDate: formattedDate,
+          position: data.card.position || '1',
+          assign_to: data.card.assign_to || '', 
+        });
+      } else {
+        throw new Error('Invalid card data structure');
+      }
     } catch (err) {
-      console.error('Error fetching card:', err);
+      
       setError('Failed to load card details');
     } finally {
       setLoading(false);
     }
   }, [cardId]);
+  
+
+  const fetchBoardMembers = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/board-members/${boardId}`,
+        {
+          credentials: 'include'
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch board members');
+      }
+
+      const data = await response.json();
+     
+      if (data && data.board_members && Array.isArray(data.board_members)) {
+        setBoardMembers(data.board_members);
+      }
+    } catch (err) {
+      
+      setError('Failed to load board members');
+    }
+  }, [boardId]);
 
   useEffect(() => {
     fetchCardDetails();
-  }, [fetchCardDetails]);
+    fetchBoardMembers();
+  }, [fetchCardDetails, fetchBoardMembers]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,30 +90,30 @@ const EditCard = () => {
     setError('');
 
     try {
-      const response = await fetch(`http://localhost:5000/api/card/update/${cardId}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE_URL}/card/update/${cardId}`, {
+        method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
           dueDate: new Date(formData.dueDate).toISOString(),
-          position: Number(formData.position)
-        })
+          position: Number(formData.position),
+        }),
       });
 
       const data = await response.json();
-      console.log('Update response:', data);
+     
 
       if (response.ok) {
         alert('Card updated successfully!');
-        navigate(`/task/${boardId}/${cardId}`);
+        navigate(`/tasks/${boardId}`);
       } else {
         throw new Error(data.msg || 'Failed to update card');
       }
     } catch (err) {
-      console.error('Error updating card:', err);
+      
       setError(err.message || 'Failed to update card. Please try again.');
     } finally {
       setLoading(false);
@@ -89,9 +122,9 @@ const EditCard = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -102,7 +135,7 @@ const EditCard = () => {
   return (
     <div className="task-details-container">
       <div className="task-header">
-        <button 
+        <button
           className="back-button"
           onClick={() => navigate(`/task/${boardId}/${cardId}`)}
         >
@@ -111,7 +144,7 @@ const EditCard = () => {
         <h1>Edit Task</h1>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+     
 
       <form onSubmit={handleSubmit} className="edit-form">
         <div className="form-group">
@@ -154,32 +187,30 @@ const EditCard = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="position">Status</label>
+          <label htmlFor="assign_to">Assign To</label>
           <select
-            id="position"
-            name="position"
-            value={formData.position}
+            id="assign_to"
+            name="assign_to"
+            value={formData.assign_to}
             onChange={handleChange}
             required
             className="form-control"
           >
-            <option value="1">To Do</option>
-            <option value="2">In Progress</option>
-            <option value="3">Completed</option>
-            <option value="4">Approved</option>
+            <option value="">Select a member</option>
+            {boardMembers.map((member) => (
+              <option key={member.user_id} value={member.user_id}>
+                {member.email}
+              </option>
+            ))}
           </select>
         </div>
 
         <div className="form-actions">
-          <button 
-            type="submit" 
-            className="button-primary"
-            disabled={loading}
-          >
+          <button type="submit" className="button-primary" disabled={loading}>
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="button-secondary"
             onClick={() => navigate(`/task/${boardId}/${cardId}`)}
             disabled={loading}
@@ -193,3 +224,6 @@ const EditCard = () => {
 };
 
 export default EditCard;
+
+
+

@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 import { Table, Button, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import '../styles/Styles.css';
+import { API_BASE_URL } from "./Config";
 
 const COLORS = ["#bac8ff", "#3d53db", "#2a3bb7", "#1a2793", "#1a2793"];
 
@@ -21,7 +22,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchBoards = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/boards", {
+        const response = await fetch(`${API_BASE_URL}/boards`, {
           method: "GET",
           credentials: "include",
         });
@@ -83,7 +84,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/board/update/${selectedBoard._id}`,
+        `${API_BASE_URL}/board/update/${selectedBoard._id}`,
         {
           method: "POST",
           credentials: "include",
@@ -121,7 +122,7 @@ const Dashboard = () => {
   const handleCloseBoard = async (boardId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/board/close/${boardId}`,
+        `${API_BASE_URL}/board/close/${boardId}`,
         {
           method: "POST",
           credentials: "include",

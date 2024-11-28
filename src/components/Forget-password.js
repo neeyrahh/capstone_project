@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'; 
+import { API_BASE_URL } from './Config';
 
 const Forget = () => {
   const {
@@ -21,7 +22,7 @@ const Forget = () => {
   // Handle form submission
   const onSubmit = async (data) => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/forgot-password", {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

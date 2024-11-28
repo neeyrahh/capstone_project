@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Styles.css';
+import { API_BASE_URL } from './Config';
 
 const AddBoardForm = () => {
   const [name, setName] = useState('');
@@ -10,7 +11,7 @@ const AddBoardForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/board/create", {
+      const response = await fetch(`${API_BASE_URL}/board/create`, {
         method: "POST",
         credentials: "include", // Ensure cookies are sent
         headers: {
