@@ -314,10 +314,9 @@ const Tasks = () => {
     <Container fluid className="tasks-container p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4>{boardName} - Tasks Board</h4>
-        <Button
-          variant="primary"
+        <Button type="submit"
           onClick={handleShowModal}
-          className="invite-member-btn"
+          className="btn invite-members"
         >
           + Invite Member
         </Button>

@@ -92,9 +92,9 @@
 
   .mt-3 {
     width: 80%;
-    font-weight: 300;
+    font-weight: 375;
     margin-top: 6rem !important;
-    color: var( --body-text);
+    color: var(--body-text);
 }
   
 .text-center.container {
@@ -191,7 +191,7 @@
   .about-section .description {
     font-size: var(--font-size-regular);
     margin-top: 1rem;
-    font-weight: 300;
+    font-weight: 375;
     padding: 0 20%;
     margin-top: 3rem !important;
     color: var(--body-text);
@@ -200,7 +200,7 @@
   p.feature-description {
     font-size: var(--font-size-regular);
     margin-top: 1rem;
-    font-weight: 300;
+    font-weight: 375;
     padding: 0 15%;
     margin-top: 3rem !important;
     color: var(--body-text);
@@ -258,7 +258,7 @@
     color: var(--body-text);
     font-size: var(--font-size-regular);
     text-align: left;
-    font-weight: 300;
+    font-weight: 375;
     line-height: 1.6;
   }
 
@@ -313,7 +313,7 @@
     color: var(--body-text);
     font-size: var(--font-size-regular);
     text-align: left;
-    font-weight: 300;
+    font-weight: 375;
     width: 83%;
     line-height: 1.6;
     padding: 0 0 2rem 0 !important;
