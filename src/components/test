@@ -24,38 +24,39 @@ const Dashboard = () => {
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [error, setError] = useState("");
 
-  // Fetch dashboard and boards data
+  // Fetch dashboard data (boards and card statistics)
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [dashboardResponse, boardsResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/dashboard`, { method: "GET", credentials: "include" }),
-          fetch(`${API_BASE_URL}/boards`, { method: "GET", credentials: "include" }),
-        ]);
+        const response = await fetch(`${API_BASE_URL}/dashboard`, {
+          method: "GET",
+          credentials: "include",
+        });
 
-        if (!dashboardResponse.ok) throw new Error("Failed to fetch dashboard data");
-        if (!boardsResponse.ok) throw new Error("Failed to fetch boards data");
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data");
+        }
 
-        const dashboardData = await dashboardResponse.json();
-        const boardsData = await boardsResponse.json();
+        const data = await response.json();
 
-        // Update state for boards and card statistics
-        setBoardData(boardsData.boards || []);
+        // Update state with boards and card stats
+        setBoardData(data.boards || []);
         setCardStats({
-          total: dashboardData.total || 0,
-          active: dashboardData.active || 0,
-          in_progress: dashboardData.in_progress || 0,
-          completed: dashboardData.completed || 0,
+          total: data.total || 0,
+          active: data.active || 0,
+          in_progress: data.in_progress || 0,
+          completed: data.completed || 0,
         });
 
         // Prepare pie chart data
-        setPieData([
-          { name: "Active Cards", value: dashboardData.active || 0 },
-          { name: "In Progress Cards", value: dashboardData.in_progress || 0 },
-          { name: "Completed Cards", value: dashboardData.completed || 0 },
-        ]);
-      } catch (err) {
-        console.error("Error fetching data:", err);
+        const pieChartData = [
+          { name: "Active", value: data.active || 0 },
+          { name: "In Progress", value: data.in_progress || 0 },
+          { name: "Completed", value: data.completed || 0 },
+        ];
+        setPieData(pieChartData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
         setError("Failed to load dashboard data.");
       }
     };
@@ -65,6 +66,7 @@ const Dashboard = () => {
 
   const handleAddBoardClick = () => navigate("/add-board");
   const handleViewBoard = (boardId) => navigate(`/tasks/${boardId}`);
+
   const handleEditBoard = (board) => {
     setSelectedBoard(board);
     setUpdatedName(board.name);
@@ -84,21 +86,30 @@ const Dashboard = () => {
         {
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: updatedName, description: updatedDescription }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: updatedName,
+            description: updatedDescription,
+          }),
         }
       );
 
-      if (!response.ok) throw new Error("Failed to update board");
+      const data = await response.json();
 
-      const updatedBoard = await response.json();
+      if (!response.ok) {
+        throw new Error(data.msg || "Failed to update board");
+      }
+
       setBoardData((prevData) =>
         prevData.map((board) =>
-          board._id === updatedBoard._id
+          board._id === selectedBoard._id
             ? { ...board, name: updatedName, description: updatedDescription }
             : board
         )
       );
+
       setShowEditModal(false);
       setSelectedBoard(null);
     } catch (err) {
@@ -113,9 +124,15 @@ const Dashboard = () => {
         credentials: "include",
       });
 
-      if (!response.ok) throw new Error("Failed to close board");
+      const data = await response.json();
 
-      setBoardData((prevData) => prevData.filter((board) => board._id !== boardId));
+      if (!response.ok) {
+        throw new Error(data.msg || "Failed to close board");
+      }
+
+      setBoardData((prevData) =>
+        prevData.filter((board) => board._id !== boardId)
+      );
     } catch (err) {
       console.error("Error closing board:", err);
     }
@@ -134,7 +151,10 @@ const Dashboard = () => {
           {/* Statistics Section */}
           <div className="row mb-4">
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div
+                className="card shadow-sm h-100"
+                style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}
+              >
                 <div className="card-body text-center">
                   <h6 className="stat-title">Total Cards</h6>
                   <p className="h3 mb-0">{cardStats.total}</p>
@@ -142,7 +162,10 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div
+                className="card shadow-sm h-100"
+                style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}
+              >
                 <div className="card-body text-center">
                   <h6 className="stat-title">Active Cards</h6>
                   <p className="h3 mb-0">{cardStats.active}</p>
@@ -150,15 +173,21 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div
+                className="card shadow-sm h-100"
+                style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}
+              >
                 <div className="card-body text-center">
-                  <h6 className="stat-title">In Progress Cards</h6>
+                  <h6 className="stat-title">In Progress</h6>
                   <p className="h3 mb-0">{cardStats.in_progress}</p>
                 </div>
               </div>
             </div>
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div
+                className="card shadow-sm h-100"
+                style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}
+              >
                 <div className="card-body text-center">
                   <h6 className="stat-title">Completed Cards</h6>
                   <p className="h3 mb-0">{cardStats.completed}</p>
@@ -185,7 +214,10 @@ const Dashboard = () => {
                       dataKey="value"
                     >
                       {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -215,16 +247,25 @@ const Dashboard = () => {
                           <td>{board.status}</td>
                           <td>
                             <div className="d-flex gap-2">
-                              <Button size="sm" className="action-button"
-                              onClick={() => handleViewBoard(board._id)}>
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                onClick={() => handleViewBoard(board._id)}
+                              >
                                 View
                               </Button>
-                              <Button size="sm"  className="action-button"
-                              onClick={() => handleEditBoard(board)}>
+                              <Button
+                                size="sm"
+                                variant="warning"
+                                onClick={() => handleEditBoard(board)}
+                              >
                                 Edit
                               </Button>
-                              <Button size="sm" className="action-button"
-                              onClick={() => handleCloseBoard(board._id)}>
+                              <Button
+                                size="sm"
+                                variant="danger"
+                                onClick={() => handleCloseBoard(board._id)}
+                              >
                                 Close
                               </Button>
                             </div>
@@ -238,7 +279,10 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <button className="floating-action-button" onClick={handleAddBoardClick}>
+          <button
+            className="floating-action-button"
+            onClick={handleAddBoardClick}
+          >
             +
           </button>
 
@@ -269,7 +313,10 @@ const Dashboard = () => {
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowEditModal(false)}
+              >
                 Cancel
               </Button>
               <Button variant="primary" onClick={handleSaveChanges}>
@@ -284,5 +331,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
