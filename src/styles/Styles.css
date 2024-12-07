@@ -754,7 +754,7 @@ span.task-icon-text {
 
 .checklist-section {
   margin-top: 1.5rem;
-  background: var(--secondary-color);
+  background: var(--primary-light2); /* Use a lighter background */
   padding: 1rem;
   border-radius: 8px;
 }
@@ -767,46 +767,49 @@ span.task-icon-text {
 .checklist-item {
   display: flex;
   align-items: center;
-  font-size: 0.95rem;
-  color: var(--primary-color);
-  margin-bottom: 0.5rem;
+  font-size: var(--font-size-regular); /* Use consistent font size */
+  color: var(--primary-dark); /* Text color */
+  margin-bottom: 0.75rem; /* Space between items */
 }
 
 .checklist-checkbox {
-  appearance: none;
+  appearance: none; /* Reset browser default */
   -webkit-appearance: none;
-  width: 0.2rem;
-  height: 0.2rem;
-  border: 2px solid var(--accent-color);
+  width: 1rem; /* Larger size for visibility */
+  height: 1rem;
+  border: 2px solid var(--primary-default); /* Solid border color */
   border-radius: 2px;
-  background-color: var(--background-color);
+  background-color: var(--white); /* Background for unselected checkbox */
   cursor: pointer;
-  margin: 0.30rem 0.75rem 0 1.5rem;
+  margin-right: 0.75rem; /* Space between checkbox and text */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .checklist-checkbox:checked {
-  background-color: var(--primary-light);
-  color: var(--primary-default);
+  background-color: var(--primary-default); /* Highlighted background */
+  color: var(--white);
+  border-color: var(--primary-default); /* Match border to background */
 }
 
 .checklist-checkbox:checked::before {
   content: "✔";
-  font-size: 0.9rem;
+  font-size: 0.8rem; /* Adjust size of checkmark */
+  color: var(--white); /* Ensure visibility */
 }
 
 .checklist-text {
-  color: var(--text-color);
+  color: var(--primary-dark);
+  font-size: var(--font-size-regular);
 }
 
 .completed {
   text-decoration: line-through;
-  color: var(--body-text);
-  font-weight: 300;
+  color: var(--body-text); /* Use subdued color for completed items */
+  font-weight: var(--font-weight-regular);
   line-height: 1.5;
-  font-size: 0.93rem;
+  font-size: var(--font-size-regular);
 }
 
 .progress-bar-container {
@@ -892,3 +895,21 @@ span.task-icon-text {
 .action-button:hover {
   background-color:  #3d53db ;
 }
+
+
+.button-icon {
+  background: none;
+  border: none;
+  margin: 20px;
+  
+}
+.checklist-add-button{
+  margin: 10px;
+}
+
+
+
+
+
+
+

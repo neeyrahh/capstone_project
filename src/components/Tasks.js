@@ -52,7 +52,7 @@ const Tasks = () => {
       }
     } catch (err) {
       
-      setModalError('Failed to load board members');
+      // setModalError('Failed to load board members');
     }
   }, [boardId]);
 
