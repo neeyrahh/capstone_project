@@ -11,6 +11,7 @@ const COLORS = ["#bac8ff", "#3d53db", "#2a3bb7", "#1a2793", "#1a2793"];
 const Dashboard = () => {
   const navigate = useNavigate();
   const [boardData, setBoardData] = useState([]);
+  const [closedBoards, setClosedBoards] = useState([]);
   const [cardStats, setCardStats] = useState({
     total: 0,
     active: 0,
@@ -18,53 +19,65 @@ const Dashboard = () => {
     completed: 0,
   });
   const [pieData, setPieData] = useState([]);
+  const [showClosedBoards, setShowClosedBoards] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState(null);
   const [updatedName, setUpdatedName] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [error, setError] = useState("");
 
-  // Fetch dashboard and boards data
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [dashboardResponse, boardsResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/dashboard`, { method: "GET", credentials: "include" }),
-          fetch(`${API_BASE_URL}/boards`, { method: "GET", credentials: "include" }),
-        ]);
+  // Fetch boards and card data
+  const fetchBoards = async () => {
+    try {
+      const [boardsResponse, dashboardResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/boards`, { method: "GET", credentials: "include" }),
+        fetch(`${API_BASE_URL}/dashboard`, { method: "GET", credentials: "include" }),
+      ]);
 
-        if (!dashboardResponse.ok) throw new Error("Failed to fetch dashboard data");
-        if (!boardsResponse.ok) throw new Error("Failed to fetch boards data");
-
-        const dashboardData = await dashboardResponse.json();
-        const boardsData = await boardsResponse.json();
-
-        // Update state for boards and card statistics
-        setBoardData(boardsData.boards || []);
-        setCardStats({
-          total: dashboardData.total || 0,
-          active: dashboardData.active || 0,
-          in_progress: dashboardData.in_progress || 0,
-          completed: dashboardData.completed || 0,
-        });
-
-        // Prepare pie chart data
-        setPieData([
-          { name: "Active Cards", value: dashboardData.active || 0 },
-          { name: "In Progress Cards", value: dashboardData.in_progress || 0 },
-          { name: "Completed Cards", value: dashboardData.completed || 0 },
-        ]);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load dashboard data.");
+      if (!boardsResponse.ok || !dashboardResponse.ok) {
+        throw new Error("Failed to fetch data");
       }
-    };
 
-    fetchDashboardData();
+      const boardsData = await boardsResponse.json();
+      const dashboardData = await dashboardResponse.json();
+
+      const activeBoards = boardsData.boards.filter((board) => board.status !== "closed");
+      const closedBoards = boardsData.boards.filter((board) => board.status === "closed");
+
+      setBoardData(activeBoards);
+      setClosedBoards(closedBoards);
+
+      // Update card statistics using dashboard data
+      updateStatistics(dashboardData);
+
+      // Prepare pie chart data
+      setPieData([
+        { name: "Active Cards", value: dashboardData.active || 0 },
+        { name: "In Progress Cards", value: dashboardData.in_progress || 0 },
+        { name: "Completed Cards", value: dashboardData.completed || 0 },
+      ]);
+    } catch (err) {
+      console.error("Error fetching data:", err.message);
+      setError("Failed to load dashboard data.");
+    }
+  };
+
+  // Update statistics based on fetched card data
+  const updateStatistics = (dashboardData) => {
+    setCardStats({
+      total: dashboardData.total || 0,
+      active: dashboardData.active || 0,
+      in_progress: dashboardData.in_progress || 0,
+      completed: dashboardData.completed || 0,
+    });
+  };
+
+  useEffect(() => {
+    fetchBoards();
   }, []);
 
-  const handleAddBoardClick = () => navigate("/add-board");
   const handleViewBoard = (boardId) => navigate(`/tasks/${boardId}`);
+
   const handleEditBoard = (board) => {
     setSelectedBoard(board);
     setUpdatedName(board.name);
@@ -116,9 +129,32 @@ const Dashboard = () => {
       if (!response.ok) throw new Error("Failed to close board");
 
       setBoardData((prevData) => prevData.filter((board) => board._id !== boardId));
+      const closedBoard = await response.json();
+      setClosedBoards((prevData) => [...prevData, closedBoard.updatedBoard]);
+
+      fetchBoards();
     } catch (err) {
-      console.error("Error closing board:", err);
+      console.error("Error closing board:", err.message);
     }
+  };
+
+  const toggleClosedBoards = async () => {
+    if (!showClosedBoards) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/closed-boards`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch closed boards");
+
+        const data = await response.json();
+        setClosedBoards(data.boards || []);
+      } catch (err) {
+        console.error("Error fetching closed boards:", err.message);
+      }
+    }
+    setShowClosedBoards(!showClosedBoards);
   };
 
   return (
@@ -127,14 +163,12 @@ const Dashboard = () => {
       {error && <p className="text-danger">{error}</p>}
       {!error && (
         <>
-          <p className="lead mb-4">
-            Below is the overview of your boards and card statistics.
-          </p>
+          <p className="lead mb-4">Below is the overview of your boards and card statistics.</p>
 
           {/* Statistics Section */}
           <div className="row mb-4">
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div className="card shadow-sm h-100">
                 <div className="card-body text-center">
                   <h6 className="stat-title">Total Cards</h6>
                   <p className="h3 mb-0">{cardStats.total}</p>
@@ -142,7 +176,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div className="card shadow-sm h-100">
                 <div className="card-body text-center">
                   <h6 className="stat-title">Active Cards</h6>
                   <p className="h3 mb-0">{cardStats.active}</p>
@@ -150,25 +184,25 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div className="card shadow-sm h-100">
                 <div className="card-body text-center">
-                  <h6 className="stat-title">In Progress Cards</h6>
+                  <h6 className="stat-title">In Progress</h6>
                   <p className="h3 mb-0">{cardStats.in_progress}</p>
                 </div>
               </div>
             </div>
             <div className="col-md-3">
-              <div className="card shadow-sm h-100" style={{ backgroundColor: "#fcfcfc", color: "#1a2793" }}>
+              <div className="card shadow-sm h-100">
                 <div className="card-body text-center">
-                  <h6 className="stat-title">Completed Cards</h6>
+                  <h6 className="stat-title">Completed</h6>
                   <p className="h3 mb-0">{cardStats.completed}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="row">
-            {/* Pie Chart */}
+          {/* Pie Chart */}
+          <div className="row mb-4">
             <div className="col-md-6">
               <div className="card shadow-sm h-100">
                 <div className="card-body">
@@ -213,21 +247,16 @@ const Dashboard = () => {
                         <tr key={board._id}>
                           <td>{board.name}</td>
                           <td>{board.status}</td>
-                          <td>
-                            <div className="d-flex gap-2">
-                              <Button size="sm" className="action-button"
-                              onClick={() => handleViewBoard(board._id)}>
-                                View
-                              </Button>
-                              <Button size="sm"  className="action-button"
-                              onClick={() => handleEditBoard(board)}>
-                                Edit
-                              </Button>
-                              <Button size="sm" className="action-button"
-                              onClick={() => handleCloseBoard(board._id)}>
-                                Close
-                              </Button>
-                            </div>
+                          <td className="d-flex gap-2">
+                            <Button size="sm" className="action-button" onClick={() => handleViewBoard(board._id)}>
+                              View
+                            </Button>{" "}
+                            <Button size="sm" className="action-button" onClick={() => handleEditBoard(board)}>
+                              Edit
+                            </Button>{" "}
+                            <Button size="sm" className="action-button" onClick={() => handleCloseBoard(board._id)}>
+                              Close
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -237,10 +266,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-
-          <button className="floating-action-button" onClick={handleAddBoardClick}>
-            +
-          </button>
 
           {/* Edit Board Modal */}
           <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
@@ -277,6 +302,44 @@ const Dashboard = () => {
               </Button>
             </Modal.Footer>
           </Modal>
+
+          {/* Closed Boards Section */}
+          <div className="mt-4">
+            <Button onClick={toggleClosedBoards} className="action-button">
+              {showClosedBoards ? "Hide Closed Boards" : "Show Closed Boards"}
+            </Button>
+            {showClosedBoards && (
+              <div className="card shadow-sm mt-4">
+                <div className="card-body">
+                  <h5 className="card-title">Closed Boards</h5>
+                  <Table striped bordered hover>
+                    <thead>
+                      <tr>
+                        <th>Board Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {closedBoards.map((board) => (
+                        <tr key={board._id}>
+                          <td>{board.name}</td>
+                          <td>{board.description}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Floating Action Button */}
+          <button
+            className="floating-action-button"
+            onClick={() => navigate("/add-board")}
+          >
+            +
+          </button>
         </>
       )}
     </div>
@@ -284,5 +347,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-

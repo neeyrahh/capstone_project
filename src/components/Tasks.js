@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-bootstrap";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "./Auth/AuthContext";
 import "../styles/Tasks.css";
 import { API_BASE_URL } from "./Config";
@@ -43,7 +43,7 @@ const Tasks = () => {
 
   const fetchBoardMembers = useCallback(async () => {
     try {
-      const response = await fetch(`/board-members/${boardId}`, {
+      const response = await fetch(`${API_BASE_URL}/board-members/${boardId}`, {
         credentials: "include",
       });
 
@@ -53,8 +53,10 @@ const Tasks = () => {
 
       const data = await response.json();
 
-      if (data && data.board_members && Array.isArray(data.board_members)) {
+      if (data && Array.isArray(data.board_members)) {
         setBoardMembers(data.board_members);
+      } else {
+        throw new Error("Invalid data format received from API");
       }
     } catch (err) {
       setModalError("Failed to load board members");
@@ -256,8 +258,12 @@ const Tasks = () => {
   const handleShowModal = async () => {
     setModalError("");
     setSuccess("");
-    await fetchBoardMembers();
-    setShowModal(true);
+    try {
+      await fetchBoardMembers();
+      setShowModal(true);
+    } catch (err) {
+      setModalError("Failed to load board members for invite modal");
+    }
   };
 
   const handleInviteMember = async (e) => {

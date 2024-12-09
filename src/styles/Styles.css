@@ -513,7 +513,7 @@ th {
 }
 
 td {
-  margin-bottom: 1.5rem !important;
+  /* margin-bottom: 1.5rem !important; */
   font-size: var(--font-size-regular) !important;
   font-weight: 375;
   color: var(--body-text) !important;
