@@ -531,6 +531,12 @@ span.dash-status {
   /* margin-bottom: 1.2rem; */
 }
 
+.status-label.approved {
+  background-color: var(--primary-dark-alt);
+  color: var(--primary-light2);
+  padding: 10px;
+}
+
 svg {
   margin-bottom: 5px;
 }
