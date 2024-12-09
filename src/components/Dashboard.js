@@ -347,3 +347,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+// display cards statistics
