@@ -766,10 +766,12 @@ span.task-icon-text {
 
 .checklist-item {
   display: flex;
-  align-items: center;
-  font-size: var(--font-size-regular); /* Use consistent font size */
-  color: var(--primary-dark); /* Text color */
-  margin-bottom: 0.75rem; /* Space between items */
+  align-items: center; /* Align vertically */
+  justify-content: space-between; /* Spread elements evenly */
+  margin-bottom: 5px; /* Reduce space between checklist items */
+  padding: 10px;
+  border-bottom: 1px solid #ddd; /* Optional: Divider between items */
+  position: relative; /* To position the delete icon */
 }
 
 .checklist-checkbox {
@@ -802,6 +804,10 @@ span.task-icon-text {
 .checklist-text {
   color: var(--primary-dark);
   font-size: var(--font-size-regular);
+}
+.checklist-item span {
+  flex: 1; /* Ensure the text takes up remaining space */
+  word-break: break-word; /* Handle long text properly */
 }
 
 .completed {
@@ -900,15 +906,44 @@ span.task-icon-text {
 .button-icon {
   background: none;
   border: none;
-  margin: 20px;
-  
+  cursor: pointer;
+  color: #333; /* Default icon color */
+  position: relative;
+  right: 10px; /* Push icon to the right corner */
+}
+
+.button-icon:hover {
+  color: #d9534f; /* Hover color for the delete icon */
 }
 .checklist-add-button{
   margin: 10px;
 }
+.checklist-edit-input {
+  flex: 1; /* Take up available space */
+  margin-right: 10px; /* Space between input and delete icon */
+  padding: 5px; /* Add padding for better usability */
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px; /* Rounded corners */
+  outline: none; /* Remove the default black border on focus */
+}
+.checklist-edit-input:focus {
+  border: 1px solid var(--primary-default); /* Add a light blue border on focus */
+  box-shadow: 0 0 5px rgba(61, 83, 219, 0.5); /* Optional shadow effect */
+}
 
+.checklist-input {
+  flex: 1; /* Stretch input field */
+  margin-right: 10px; /* Space from "Add" button */
+  padding: 8px;
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px;
+  outline: none; /* Remove black border on focus */
+}
 
-
+.checklist-input:focus {
+  border: 1px solid var(--primary-default); /* Add a light blue border on focus */
+  box-shadow: 0 0 5px rgba(61, 83, 219, 0.5); /* Optional shadow effect */
+}
 
 
 

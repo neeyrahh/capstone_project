@@ -107,10 +107,32 @@ const TaskDetails = () => {
   };
 
   // Delete a checklist item
-  const handleDeleteChecklistItem = (index) => {
-    const updatedChecklist = checklist.filter((_, idx) => idx !== index);
-    setChecklist(updatedChecklist);
+  const handleDeleteChecklistItem = async (checklistItemId) => {
+    try {
+      console.log("Deleting Checklist Item ID:", checklistItemId);
+  
+      const response = await fetch(`${API_BASE_URL}/card/${cardId}/checklist/${checklistItemId}`, {
+        method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
+      });
+  
+      if (!response.ok) {
+        const errorMsg = await response.text(); // Capture backend error message
+        throw new Error(`Failed to delete checklist item: ${errorMsg}`);
+      }
+  
+      const data = await response.json();
+      console.log("Backend Response:", data);
+  
+      // Update the checklist state with the updated checklist array
+      setChecklist(data.card?.checklist || []);
+      alert('Checklist item deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting checklist item:', error);
+      alert('Failed to delete checklist item.');
+    }
   };
+  
 
   // Calculate the progress percentage of the checklist
   const calculateProgress = () => {
@@ -277,7 +299,7 @@ const TaskDetails = () => {
               )}
               <button
                 className="button-icon"
-                onClick={() => handleDeleteChecklistItem(index)}
+                onClick={() => handleDeleteChecklistItem(item._id)}
               >
                 <FaTrash />
               </button>
