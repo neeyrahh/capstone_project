@@ -9,12 +9,12 @@ import {
   Form,
   Alert,
 } from "react-bootstrap";
+import Cookies from "js-cookie";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "./Auth/AuthContext";
 import "../styles/Tasks.css";
 import { API_BASE_URL } from "./Config";
-import { FaEye } from 'react-icons/fa';
 
 const LIST_CONFIG = [
   { ListID: 1, Name: "To Do", position: 1 },
@@ -90,14 +90,10 @@ const Tasks = () => {
 
       const groupedCards = await response.json();
 
-      console.log("Grouped Cards from Backend:", groupedCards); // Debugging log
-
       const updatedLists = LIST_CONFIG.map((list) => ({
         ...list,
         cards: groupedCards[list.position] || [],
       }));
-
-      console.log("Updated Lists:", updatedLists); // Debugging log
 
       setLists(updatedLists);
     } catch (err) {
@@ -137,108 +133,68 @@ const Tasks = () => {
     fetchCards,
     fetchBoardMembers,
   ]);
-  // working drag and drop
 
   const handleDragEnd = async (result) => {
-    const { source, destination } = result;
-
-    // Cancel if dropped outside a valid droppable area or in the same position
-    if (
-      !destination ||
-      (source.droppableId === destination.droppableId &&
-        source.index === destination.index)
-    ) {
-      console.log(
-        "Drag operation canceled or item dropped in the same position."
-      );
+    const { source, destination, draggableId } = result;
+  
+    // If dropped outside a droppable area or in the same position, do nothing
+    if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
+      console.log("Drag canceled or dropped in the same place");
       return;
     }
-
+  
     const sourceListIndex = lists.findIndex(
       (list) => list.ListID === parseInt(source.droppableId)
     );
     const destListIndex = lists.findIndex(
       (list) => list.ListID === parseInt(destination.droppableId)
     );
-
+  
     const sourceList = lists[sourceListIndex];
     const destList = lists[destListIndex];
-
     const draggedCard = sourceList.cards[source.index];
-
-    if (!draggedCard) {
-      console.error("Dragged card not found in source list.");
-      return;
-    }
-
-    console.log("Dragged Card:", draggedCard);
-    console.log("Source List:", sourceList);
-    console.log("Destination List:", destList);
-
-    // Optimistic UI update
+  
     const updatedSourceCards = [...sourceList.cards];
-    updatedSourceCards.splice(source.index, 1); // Remove the card from source
-
+    updatedSourceCards.splice(source.index, 1);
+  
     const updatedDestCards = [...destList.cards];
-    updatedDestCards.splice(destination.index, 0, draggedCard); // Add card to destination
-
-    const updatedLists = lists.map((list, index) => {
-      if (index === sourceListIndex) {
-        return { ...list, cards: updatedSourceCards };
-      }
-      if (index === destListIndex) {
-        return { ...list, cards: updatedDestCards };
-      }
-      return list;
-    });
-
+    updatedDestCards.splice(destination.index, 0, draggedCard);
+  
+    const updatedLists = [...lists];
+    updatedLists[sourceListIndex] = { ...sourceList, cards: updatedSourceCards };
+    updatedLists[destListIndex] = { ...destList, cards: updatedDestCards };
+  
     setLists(updatedLists);
-
-    // Send updated position to the backend
+  
+    // Save the state to cookies
+    const updatedCardPosition = {
+      cardId: draggableId,
+      oldListId: sourceList.ListID,
+      newListId: destList.ListID,
+      position: destination.index,
+    };
+  
+    Cookies.set("updatedCardPosition", JSON.stringify(updatedCardPosition));
+  
+    // Sync with backend
     try {
-      const newPosition = destList.position; // Map to the destination list's position
       const response = await fetch(`${API_BASE_URL}/cards/update-position`, {
-        method: "PUT",
+        method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          cardId: draggedCard._id,
-          newPosition: newPosition, // Use position from the LIST_CONFIG
-        }),
+        body: JSON.stringify(updatedCardPosition),
       });
-
+  
       if (!response.ok) {
-        throw new Error("Failed to update card position on the backend.");
+        throw new Error("Failed to update card position on the backend");
       }
-
-      const data = await response.json();
-      console.log("Backend Response:", data);
-
-      // Update the UI based on the backend response
-      const updatedCard = data.card;
-      setLists((prevLists) =>
-        prevLists.map((list) => {
-          // Remove the card from all lists
-          const filteredCards = list.cards.filter(
-            (card) => card._id !== updatedCard._id
-          );
-
-          // If this is the destination list, add the updated card
-          if (list.ListID === parseInt(destination.droppableId)) {
-            filteredCards.splice(destination.index, 0, updatedCard);
-          }
-
-          return { ...list, cards: filteredCards };
-        })
-      );
+  
+      console.log("Card position successfully updated on the backend");
+      Cookies.remove("updatedCardPosition"); // Remove cookie after successful sync
     } catch (err) {
-      console.error("Error updating card position:", err);
-      alert("Failed to update card position. Please try again.");
-
-      // Revert the optimistic UI update in case of error
-      setLists(lists);
+      console.error("Failed to save card position:", err);
     }
   };
 
@@ -316,9 +272,9 @@ const Tasks = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4>{boardName} - Tasks Board</h4>
         <Button
-          type="submit"
+          variant="primary"
           onClick={handleShowModal}
-          className="btn invite-members"
+          className="invite-member-btn"
         >
           + Invite Member
         </Button>
@@ -326,22 +282,16 @@ const Tasks = () => {
 
       {error && <Alert variant="danger">{error}</Alert>}
 
-      <DragDropContext
-        onDragEnd={handleDragEnd}
-        onDragStart={(result) => console.log("Drag Started: ", result)}
-        onDragUpdate={(result) => console.log("Drag Updated: ", result)}
-      >
+      <DragDropContext onDragEnd={handleDragEnd}>
         <Row className="gx-3">
           {lists.map((list) => (
             <Col key={list.ListID} md={3} className="mb-4">
-              <Droppable droppableId={list.ListID.toString()} type="TASK">
-                {(provided, snapshot) => (
+              <Droppable droppableId={list.ListID.toString()}>
+                {(provided) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`task-list ${
-                      snapshot.isDraggingOver ? "dragging-over" : ""
-                    }`}
+                    className="task-list"
                   >
                     <h5 className="list-title text-center mb-3">
                       {list.Name}
@@ -355,29 +305,17 @@ const Tasks = () => {
                         draggableId={card._id}
                         index={index}
                       >
-                        {(provided, snapshot) => (
-                          <div
+                        {(provided) => (
+                          <Link
+                            to={`/task/${boardId}/${card._id}`}
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`task-card-container ${
-                              snapshot.isDragging ? "dragging" : ""
-                            }`}
+                            style={{ textDecoration: "none" }}
                           >
                             <Card className="task-card mb-3 shadow-sm">
                               <Card.Body>
-                                <div className="card-heading">
                                 <Card.Title>{card.title}</Card.Title>
-                                <FaEye className="task-icon"
-                                  style={{ cursor: 'pointer' }}
-                                  onClick={() =>
-                                    navigate(`/task/${boardId}/${card._id}`)
-                                  }
-                                >
-                                  {" "}
-                                  View{" "}
-                                </FaEye>
-                                </div>
                                 <Card.Text>
                                   <small>
                                     <strong>Assigned to: </strong>
@@ -388,14 +326,12 @@ const Tasks = () => {
                                   <br />
                                   <small>
                                     <strong>Due Date: </strong>
-                                    {new Date(
-                                      card.dueDate
-                                    ).toLocaleDateString()}
+                                    {new Date(card.dueDate).toLocaleDateString()}
                                   </small>
                                 </Card.Text>
                               </Card.Body>
                             </Card>
-                          </div>
+                          </Link>
                         )}
                       </Draggable>
                     ))}
