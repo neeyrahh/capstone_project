@@ -3,62 +3,87 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 import { Table, Button, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import '../styles/Styles.css';
+import "../styles/Styles.css";
 import { API_BASE_URL } from "./Config";
 
 const COLORS = ["#bac8ff", "#3d53db", "#2a3bb7", "#1a2793", "#1a2793"];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [boardData, setBoardData] = useState([]);
+  const [boardData, setBoardData] = useState([]); // Active boards
+  const [closedBoards, setClosedBoards] = useState([]); // Closed boards
   const [pieData, setPieData] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState(null);
   const [updatedName, setUpdatedName] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [error, setError] = useState("");
+  const [showClosedBoards, setShowClosedBoards] = useState(false); // Toggle closed boards visibility
 
-  // Fetch board data
+  // Fetch active and closed boards
   useEffect(() => {
     const fetchBoards = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/boards`, {
+        const activeResponse = await fetch(`${API_BASE_URL}/boards`, {
           method: "GET",
           credentials: "include",
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch boards");
+        if (!activeResponse.ok) {
+          throw new Error("Failed to fetch active boards");
         }
 
-        const data = await response.json();
-        const boards = data.boards;
+        const activeData = await activeResponse.json();
+        const activeBoards = activeData.boards;
 
-        setBoardData(boards);
+        setBoardData(activeBoards);
 
         const pieData = [
-          { name: "Total Boards", value: boards.length },
+          { name: "Total Boards", value: activeBoards.length },
           {
             name: "Started",
-            value: boards.filter((board) => board.status === "started").length,
+            value: activeBoards.filter(
+              (board) => board.status === "started"
+            ).length,
           },
           {
             name: "In Progress",
-            value: boards.filter((board) => board.status === "in-progress")
-              .length,
+            value: activeBoards.filter(
+              (board) => board.status === "in-progress"
+            ).length,
           },
           {
             name: "Done",
-            value: boards.filter((board) => board.status === "done").length,
+            value: activeBoards.filter((board) => board.status === "done")
+              .length,
           },
         ];
         setPieData(pieData);
       } catch (error) {
-        console.error("Error fetching boards:", error);
+        console.error("Error fetching active boards:", error);
+      }
+    };
+
+    const fetchClosedBoards = async () => {
+      try {
+        const closedResponse = await fetch(`${API_BASE_URL}/closed-boards`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!closedResponse.ok) {
+          throw new Error("Failed to fetch closed boards");
+        }
+
+        const closedData = await closedResponse.json();
+        setClosedBoards(closedData.boards);
+      } catch (error) {
+        console.error("Error fetching closed boards:", error);
       }
     };
 
     fetchBoards();
+    fetchClosedBoards();
   }, []);
 
   const handleAddBoardClick = () => {
@@ -128,18 +153,72 @@ const Dashboard = () => {
           credentials: "include",
         }
       );
-
-      const data = await response.json();
-
+  
       if (!response.ok) {
-        throw new Error(data.msg || "Failed to close board");
+        throw new Error("Failed to close board");
       }
-
+  
+      // Remove the board from the active boards list
       setBoardData((prevData) =>
         prevData.filter((board) => board._id !== boardId)
       );
+  
+      // Fetch the updated closed boards and add the closed board to the list
+      const closedBoard = await response.json();
+      setClosedBoards((prevData) => [...prevData, closedBoard.updatedBoard]);
     } catch (err) {
       console.error("Error closing board:", err);
+    }
+  };
+  
+
+  const handleReopenBoard = async (boardId) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/board/reopen/${boardId}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to reopen board");
+      }
+  
+      // Remove the board from the closed boards list
+      setClosedBoards((prevData) =>
+        prevData.filter((board) => board._id !== boardId)
+      );
+  
+      // Fetch the updated active boards and add the reopened board to the list
+      const reopenedBoard = await response.json();
+      setBoardData((prevData) => [...prevData, reopenedBoard.updatedBoard]);
+    } catch (err) {
+      console.error("Error reopening board:", err);
+    }
+  };
+  
+
+  const handleDeleteBoard = async (boardId) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/board/delete/${boardId}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete board");
+      }
+
+      setClosedBoards((prevData) =>
+        prevData.filter((board) => board._id !== boardId)
+      );
+    } catch (err) {
+      console.error("Error deleting board:", err);
     }
   };
 
@@ -263,11 +342,65 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+{/* Closed Boards Section */}
+<div className="mt-4">
+  <Button
+    onClick={() => setShowClosedBoards(!showClosedBoards)}
+    className="action-button" size="mm"
+    
+  >
+    {showClosedBoards ? "Hide Closed Boards" : "Show Closed Boards"}
+  </Button>
+  {showClosedBoards && (
+    <div className="card shadow-sm">
+      <div className="card-body">
+        <h5 className="card-title">Closed Boards</h5>
+        <Table striped bordered hover>
+          <thead className="board">
+            <tr>
+              <th>Board Name</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {closedBoards.map((board) => (
+              <tr key={board._id}>
+                <td>{board.name}</td>
+                <td>{board.description}</td>
+                <td>
+                  <div style={{ display: "flex", gap: "5px" }}>
+                    <Button
+                      className="action-button"
+                      size="sm"
+                      variant="success"
+                      onClick={() => handleReopenBoard(board._id)}
+                    >
+                      Reopen
+                    </Button>
+                    <Button
+                      className="action-button"
+                      size="sm"
+                      variant="danger"
+                      onClick={() => handleDeleteBoard(board._id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    </div>
+  )}
+</div>
 
-<button className="floating-action-button" onClick={handleAddBoardClick}>
-  +
-</button>
-
+      {/* Add Board Button */}
+      <button className="floating-action-button" onClick={handleAddBoardClick}>
+        +
+      </button>
 
       {/* Edit Board Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
@@ -305,6 +438,7 @@ const Dashboard = () => {
         </Modal.Footer>
       </Modal>
     </div>
+ 
   );
 };
 
