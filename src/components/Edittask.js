@@ -14,68 +14,74 @@ const EditCard = () => {
     description: '',
     dueDate: '',
     position: '',
-    assign_to: '' // New field for assignment
+    assign_to: '' 
   });
-  const [boardMembers, setBoardMembers] = useState([]); 
+  const [boardMembers, setBoardMembers] = useState([]);
 
+  // Fetch card details
   const fetchCardDetails = useCallback(async () => {
     try {
-      
-      const response = await fetch(`/card/${cardId}`, {
-        credentials: 'include',
+      const response = await fetch(`${API_BASE_URL}/cards/${boardId}`, {
+        credentials: 'include'
       });
   
       if (!response.ok) {
-        throw new Error(`Failed to fetch card details. Status: ${response.status}`);
+        throw new Error('Failed to fetch cards');
       }
   
       const data = await response.json();
-      
+     
   
       // Check if the data structure is what you expect
-      if (data && data.card) {
-        const formattedDate = new Date(data.card.dueDate).toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+      if (data && data[1] && data[1].length > 0) {
+        const card = data[1][0]; 
+  
+        const formattedDate = new Date(card.dueDate).toISOString().slice(0, 16); 
   
         setFormData({
-          title: data.card.title || '',
-          description: data.card.description || '',
+          title: card.title || '',
+          description: card.description || '',
           dueDate: formattedDate,
-          position: data.card.position || '1',
-          assign_to: data.card.assign_to || '', 
+          position: card.position || '1',
+          assign_to: card.assign_to?._id || '', 
         });
+  
+       
       } else {
+        
         throw new Error('Invalid card data structure');
       }
     } catch (err) {
-      
-      setError('Failed to load card details');
+    
     } finally {
       setLoading(false);
     }
-  }, [cardId]);
+  }, [boardId]);
   
+
 
   const fetchBoardMembers = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/board-members/${boardId}`,
-        {
-          credentials: 'include'
-        }
-      );
+    
+      const response = await fetch(`${API_BASE_URL}/board-members/${boardId}`, {
+        credentials: 'include'
+      });
 
       if (!response.ok) {
         throw new Error('Failed to fetch board members');
       }
 
       const data = await response.json();
-     
+      
+
       if (data && data.board_members && Array.isArray(data.board_members)) {
         setBoardMembers(data.board_members);
+      } else {
+    
       }
     } catch (err) {
-      
       setError('Failed to load board members');
+     
     }
   }, [boardId]);
 
@@ -84,12 +90,14 @@ const EditCard = () => {
     fetchBoardMembers();
   }, [fetchCardDetails, fetchBoardMembers]);
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+     
       const response = await fetch(`${API_BASE_URL}/card/update/${cardId}`, {
         method: 'POST',
         credentials: 'include',
@@ -104,7 +112,7 @@ const EditCard = () => {
       });
 
       const data = await response.json();
-     
+      
 
       if (response.ok) {
         alert('Card updated successfully!');
@@ -113,24 +121,28 @@ const EditCard = () => {
         throw new Error(data.msg || 'Failed to update card');
       }
     } catch (err) {
-      
       setError(err.message || 'Failed to update card. Please try again.');
+     
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle form field change
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
+ 
   if (loading && !formData.title) {
     return <div className="loading">Loading...</div>;
   }
+
 
   return (
     <div className="task-details-container">
@@ -144,7 +156,7 @@ const EditCard = () => {
         <h1>Edit Task</h1>
       </div>
 
-     
+      {error && <div className="error-message">{error}</div>}
 
       <form onSubmit={handleSubmit} className="edit-form">
         <div className="form-group">
@@ -224,6 +236,3 @@ const EditCard = () => {
 };
 
 export default EditCard;
-
-
-
