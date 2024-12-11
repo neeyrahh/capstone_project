@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 import { Table, Button, Modal, Form } from "react-bootstrap";
-
 import { useNavigate } from "react-router-dom";
 import "../styles/Styles.css";
 import { API_BASE_URL } from "./Config";
@@ -28,32 +27,22 @@ const Dashboard = () => {
   const [error, setError] = useState("");
 
   // Fetch boards and card data
-  const fetchBoards = useCallback(async () => {
+  const fetchBoards = async () => {
     try {
       const [boardsResponse, dashboardResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/boards`, {
-          method: "GET",
-          credentials: "include",
-        }),
-        fetch(`${API_BASE_URL}/dashboard`, {
-          method: "GET",
-          credentials: "include",
-        }),
+        fetch(`${API_BASE_URL}/boards`, { method: "GET", credentials: "include" }),
+        fetch(`${API_BASE_URL}/dashboard`, { method: "GET", credentials: "include" }),
       ]);
 
       if (!boardsResponse.ok || !dashboardResponse.ok) {
-        throw new Error("Failed to fetch dashboard data");
+        throw new Error("Failed to fetch data");
       }
 
       const boardsData = await boardsResponse.json();
       const dashboardData = await dashboardResponse.json();
 
-      const activeBoards = boardsData.boards.filter(
-        (board) => board.status !== "closed"
-      );
-      const closedBoards = boardsData.boards.filter(
-        (board) => board.status === "closed"
-      );
+      const activeBoards = boardsData.boards.filter((board) => board.status !== "closed");
+      const closedBoards = boardsData.boards.filter((board) => board.status === "closed");
 
       setBoardData(activeBoards);
       setClosedBoards(closedBoards);
@@ -71,7 +60,7 @@ const Dashboard = () => {
       console.error("Error fetching data:", err.message);
       setError("Failed to load dashboard data.");
     }
-  }, []);
+  };
 
   // Update statistics based on fetched card data
   const updateStatistics = (dashboardData) => {
@@ -85,7 +74,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchBoards();
-  }, [fetchBoards]);
+  }, []);
 
   const handleViewBoard = (boardId) => navigate(`/tasks/${boardId}`);
 
@@ -109,10 +98,7 @@ const Dashboard = () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: updatedName,
-            description: updatedDescription,
-          }),
+          body: JSON.stringify({ name: updatedName, description: updatedDescription }),
         }
       );
 
@@ -141,12 +127,8 @@ const Dashboard = () => {
       });
 
       if (!response.ok) throw new Error("Failed to close board");
-// Remove the board from the active boards list
-      setBoardData((prevData) =>
-        prevData.filter((board) => board._id !== boardId)
-      );
 
-      // Fetch the updated closed boards and add the closed board to the list
+      setBoardData((prevData) => prevData.filter((board) => board._id !== boardId));
       const closedBoard = await response.json();
       setClosedBoards((prevData) => [...prevData, closedBoard.updatedBoard]);
 
@@ -154,6 +136,25 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Error closing board:", err.message);
     }
+  };
+
+  const toggleClosedBoards = async () => {
+    if (!showClosedBoards) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/closed-boards`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch closed boards");
+
+        const data = await response.json();
+        setClosedBoards(data.boards || []);
+      } catch (err) {
+        console.error("Error fetching closed boards:", err.message);
+      }
+    }
+    setShowClosedBoards(!showClosedBoards);
   };
 
   const handleReopenBoard = async (boardId) => {
@@ -205,26 +206,6 @@ const Dashboard = () => {
       console.error("Error deleting board:", err);
     }
   };
-  
-
-  const toggleClosedBoards = async () => {
-    if (!showClosedBoards) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/closed-boards`, {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch closed boards");
-
-        const data = await response.json();
-        setClosedBoards(data.boards || []);
-      } catch (err) {
-        console.error("Error fetching closed boards:", err.message);
-      }
-    }
-    setShowClosedBoards(!showClosedBoards);
-  };
 
   return (
     <div className="dashboard-container p-4">
@@ -232,9 +213,7 @@ const Dashboard = () => {
       {error && <p className="text-danger">{error}</p>}
       {!error && (
         <>
-          <p className="lead mb-4">
-            Below is the overview of your boards and card statistics.
-          </p>
+          <p className="lead mb-4">Below is the overview of your boards and card statistics.</p>
 
           {/* Statistics Section */}
           <div className="row mb-4">
@@ -290,10 +269,7 @@ const Dashboard = () => {
                       dataKey="value"
                     >
                       {pieData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -322,25 +298,13 @@ const Dashboard = () => {
                           <td>{board.name}</td>
                           <td>{board.status}</td>
                           <td className="d-flex gap-2">
-                            <Button
-                              size="sm"
-                              className="action-button"
-                              onClick={() => handleViewBoard(board._id)}
-                            >
+                            <Button size="sm" className="action-button" onClick={() => handleViewBoard(board._id)}>
                               View
                             </Button>{" "}
-                            <Button
-                              size="sm"
-                              className="action-button"
-                              onClick={() => handleEditBoard(board)}
-                            >
+                            <Button size="sm" className="action-button" onClick={() => handleEditBoard(board)}>
                               Edit
                             </Button>{" "}
-                            <Button
-                              size="sm"
-                              className="action-button"
-                              onClick={() => handleCloseBoard(board._id)}
-                            >
+                            <Button size="sm" className="action-button" onClick={() => handleCloseBoard(board._id)}>
                               Close
                             </Button>
                           </td>
@@ -380,10 +344,7 @@ const Dashboard = () => {
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                variant="secondary"
-                onClick={() => setShowEditModal(false)}
-              >
+              <Button variant="secondary" onClick={() => setShowEditModal(false)}>
                 Cancel
               </Button>
               <Button variant="primary" onClick={handleSaveChanges}>
@@ -457,5 +418,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 
 // display cards statistics

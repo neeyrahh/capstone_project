@@ -938,3 +938,10 @@ span.task-icon-text {
   border-radius: 8px;
   padding: 30px;
 }
+
+input.checklist-input {
+  height: 44px;
+  margin-right: 10px;
+  font-size: var(--font-size-small);
+  font-weight: 400;
+}
