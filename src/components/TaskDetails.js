@@ -48,51 +48,50 @@ const TaskDetails = () => {
     setChecklist(updatedChecklist);
   };
 
-  // Add a new checklist item
-  const handleAddChecklistItem = () => {
-    if (!newChecklistItem.trim()) return;
+// Add a new checklist item and save it to the backend
+const handleAddChecklistItemAndSave = async () => {
+  if (!newChecklistItem.trim()) return;
 
-    const updatedChecklist = [
-      ...checklist,
-      { item: newChecklistItem.trim(), completed: false },
-    ];
-    setChecklist(updatedChecklist);
-    setNewChecklistItem('');
-  };
+  const newItem = { item: newChecklistItem.trim(), completed: false };
+  const updatedChecklist = [...checklist, newItem];
 
-  // Save the checklist to the backend
-  const saveChecklist = async () => {
-    setIsSaving(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/card/update/${cardId}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: task.title,
-          description: task.description,
-          dueDate: task.dueDate,
-          assign_to: task.assign_to,
-          checklist,
-        }),
-      });
+  // Optimistic update to the UI
+  setChecklist(updatedChecklist);
+  setNewChecklistItem("");
 
-      if (!response.ok) {
-        throw new Error('Failed to save checklist');
-      }
+  // Save to the backend
+  try {
+    const response = await fetch(`${API_BASE_URL}/card/update/${cardId}`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: task.title,
+        description: task.description,
+        dueDate: task.dueDate,
+        assign_to: task.assign_to,
+        checklist: updatedChecklist,
+      }),
+    });
 
-      const data = await response.json();
-      setTask(data.card); // Update task with the latest backend data
-      alert('Checklist saved successfully!');
-    } catch (error) {
-      console.error('Error saving checklist:', error);
-      alert('Failed to save checklist.');
-    } finally {
-      setIsSaving(false);
+    if (!response.ok) {
+      throw new Error("Failed to save checklist");
     }
-  };
+
+    const data = await response.json();
+    setTask(data.card); // Update task with the latest backend data
+    setChecklist(data.card?.checklist || []); // Update checklist with backend response
+    alert("Checklist item added and saved successfully!");
+  } catch (error) {
+    console.error("Error saving checklist item:", error);
+    alert("Failed to add checklist item.");
+    // Rollback optimistic UI update if save fails
+    setChecklist(checklist);
+  }
+};
+
 
   // Edit a checklist item
   const handleEditChecklistItem = (index) => {
@@ -102,7 +101,7 @@ const TaskDetails = () => {
   const handleEditSubmit = (e, index) => {
     if (e.key === 'Enter') {
       setEditIndex(null);
-      saveChecklist(); // Save checklist when editing is complete
+      // saveChecklist(); // Save checklist when editing is complete
     }
   };
 
@@ -314,21 +313,21 @@ const TaskDetails = () => {
               className="checklist-input"
             />
             <button
-              className="button-primary checklist-add-button"
-              onClick={handleAddChecklistItem}
-              disabled={!newChecklistItem.trim()}
-            >
-              Add
+    className="button-primary checklist-add-button"
+    onClick={handleAddChecklistItemAndSave}
+    disabled={!newChecklistItem.trim() || isSaving}
+  >
+    {isSaving ? "Saving..." : "Add and Save"}
             </button>
           </div>
         </div>
-        <button
+        {/* <button
           className="button-primary"
           onClick={saveChecklist}
           disabled={isSaving}
         >
           {isSaving ? 'Saving...' : 'Save Checklist'}
-        </button>
+        </button> */}
       </div>
 
       <div className="task-actions">
