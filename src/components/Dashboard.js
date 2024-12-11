@@ -19,12 +19,12 @@ const Dashboard = () => {
     completed: 0,
   });
   const [pieData, setPieData] = useState([]);
-  const [showClosedBoards, setShowClosedBoards] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState(null);
   const [updatedName, setUpdatedName] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [error, setError] = useState("");
+  const [showClosedBoards, setShowClosedBoards] = useState(false); // Toggle closed boards visibility
 
   // Fetch boards and card data
   const fetchBoards = async () => {
@@ -202,10 +202,15 @@ const Dashboard = () => {
       setClosedBoards((prevData) =>
         prevData.filter((board) => board._id !== boardId)
       );
+  
+      // Fetch the updated closed boards and add the closed board to the list
+      const closedBoard = await response.json();
+      setClosedBoards((prevData) => [...prevData, closedBoard.updatedBoard]);
     } catch (err) {
       console.error("Error deleting board:", err);
     }
   };
+  
 
   return (
     <div className="dashboard-container p-4">
@@ -317,41 +322,41 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Edit Board Modal */}
-          <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Edit Board</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              {error && <p className="text-danger">{error}</p>}
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label>Board Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={updatedName}
-                    onChange={(e) => setUpdatedName(e.target.value)}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    value={updatedDescription}
-                    onChange={(e) => setUpdatedDescription(e.target.value)}
-                  />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={handleSaveChanges}>
-                Save Changes
-              </Button>
-            </Modal.Footer>
-          </Modal>
+{/* Edit Board Modal */}
+<Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Board</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error && <p className="text-danger">{error}</p>}
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Board Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={updatedName}
+                onChange={(e) => setUpdatedName(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                value={updatedDescription}
+                onChange={(e) => setUpdatedDescription(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
           {/* Closed Boards Section */}
           <div className="mt-4">
@@ -414,6 +419,7 @@ const Dashboard = () => {
         </>
       )}
     </div>
+ 
   );
 };
 

@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-bootstrap";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link,useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "./Auth/AuthContext";
 import "../styles/Tasks.css";
 import { API_BASE_URL } from "./Config";
@@ -43,28 +43,28 @@ const Tasks = () => {
 
   const fetchBoardMembers = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/board-members/${boardId}`, {
-        credentials: "include",
+      const response = await fetch(`/board-members/${boardId}`, {
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch board members");
+        throw new Error('Failed to fetch board members');
       }
 
       const data = await response.json();
+      
+      
 
-      if (data && Array.isArray(data.board_members)) {
-        setBoardMembers(data.board_members);
-      } else {
-        throw new Error("Invalid data format received from API");
-      }
+      setBoardMembers(data.board_members || []);
     } catch (err) {
-      setModalError("Failed to load board members");
+   
     }
   }, [boardId]);
 
+
   const fetchBoardDetails = useCallback(async () => {
     try {
+      
       const response = await fetch(`${API_BASE_URL}/board/${boardId}`, {
         credentials: "include",
       });
@@ -74,6 +74,7 @@ const Tasks = () => {
       }
 
       const data = await response.json();
+      
       setBoardName(data.board.name);
     } catch (err) {
       setError("Failed to load board details");
@@ -82,6 +83,7 @@ const Tasks = () => {
 
   const fetchCards = useCallback(async () => {
     try {
+   
       const response = await fetch(`${API_BASE_URL}/cards/${boardId}`, {
         credentials: "include",
       });
@@ -90,14 +92,19 @@ const Tasks = () => {
         throw new Error("Failed to fetch cards");
       }
 
-      const groupedCards = await response.json();
+      // const groupedCards = await response.json();
 
-      console.log("Grouped Cards from Backend:", groupedCards); // Debugging log
+      // console.log("Grouped Cards from Backend:", groupedCards); // Debugging log
 
-      const updatedLists = LIST_CONFIG.map((list) => ({
-        ...list,
-        cards: groupedCards[list.position] || [],
-      }));
+      const data = await response.json();
+
+      const updatedLists = LIST_CONFIG.map(list => {
+        const positionCards = data[list.position] || [];
+        return {
+          ...list,
+          cards: Array.isArray(positionCards) ? positionCards : []
+        };
+      });
 
       console.log("Updated Lists:", updatedLists); // Debugging log
 
@@ -245,10 +252,12 @@ const Tasks = () => {
   };
 
   const handleAddCard = () => {
+   
     navigate(`/tasks/${boardId}/add`);
   };
 
   const handleCloseModal = () => {
+   
     setShowModal(false);
     setEmail("");
     setModalError("");
@@ -268,6 +277,7 @@ const Tasks = () => {
 
   const handleInviteMember = async (e) => {
     e.preventDefault();
+   
     setIsLoading(true);
     setModalError("");
     setSuccess("");
@@ -333,93 +343,97 @@ const Tasks = () => {
       {error && <Alert variant="danger">{error}</Alert>}
 
       <DragDropContext
-        onDragEnd={handleDragEnd}
-        onDragStart={(result) => console.log("Drag Started: ", result)}
-        onDragUpdate={(result) => console.log("Drag Updated: ", result)}
-      >
-        <Row className="gx-3">
-          {lists.map((list) => (
-            <Col key={list.ListID} md={3} className="mb-4">
-              <Droppable droppableId={list.ListID.toString()} type="TASK">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`task-list ${
-                      snapshot.isDraggingOver ? "dragging-over" : ""
-                    }`}
-                  >
-                    <h5 className="list-title text-center mb-3">
-                      {list.Name}
-                      <span className="badge bg-secondary ms-2">
-                        {list.cards.length}
-                      </span>
-                    </h5>
-                    {list.cards.map((card, index) => (
-                      <Draggable
-                        key={card._id}
-                        draggableId={card._id}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`task-card-container ${
-                              snapshot.isDragging ? "dragging" : ""
-                            }`}
-                          >
-                            <Card className="task-card mb-3 shadow-sm">
-                              <Card.Body>
-                                <div className="card-heading">
-                                <Card.Title>{card.title}</Card.Title>
-                                <FaEye className="task-icon"
-                                  style={{ cursor: 'pointer' }}
-                                  onClick={() =>
-                                    navigate(`/task/${boardId}/${card._id}`)
-                                  }
-                                >
-                                  {" "}
-                                  View{" "}
-                                </FaEye>
-                                </div>
-                                <Card.Text>
-                                  <small>
-                                    <strong>Assigned to: </strong>
-                                    {boardMembers.find(
-                                      (m) => m.user_id === card.assign_to
-                                    )?.email || card.assign_to}
-                                  </small>
-                                  <br />
-                                  <small>
-                                    <strong>Due Date: </strong>
-                                    {new Date(
-                                      card.dueDate
-                                    ).toLocaleDateString()}
-                                  </small>
-                                </Card.Text>
-                              </Card.Body>
-                            </Card>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                    <Button
-                      variant="outline-secondary"
-                      className="w-100 mt-2 add-card-btn"
-                      onClick={handleAddCard}
+  onDragEnd={handleDragEnd}
+  onDragStart={(result) => console.log("Drag Started: ", result)}
+  onDragUpdate={(result) => console.log("Drag Updated: ", result)}
+>
+  <Row className="gx-3">
+    {lists?.map((list) => (
+      <Col key={list.ListID} md={3} className="mb-4">
+        <Droppable droppableId={list.ListID.toString()} type="TASK">
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={`task-list ${
+                snapshot.isDraggingOver ? "dragging-over" : ""
+              }`}
+            >
+              <h5 className="list-title text-center mb-3">
+                {list.Name}
+                <span className="badge bg-secondary ms-2">
+                  {list.cards?.length || 0}
+                </span>
+              </h5>
+              {list.cards?.map((card, index) => (
+                <Draggable
+                  key={card._id.toString()}
+                  draggableId={card._id.toString()}
+                  index={index}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`task-card-container ${
+                        snapshot.isDragging ? "dragging" : ""
+                      }`}
                     >
-                      + Add a card
-                    </Button>
-                  </div>
-                )}
-              </Droppable>
-            </Col>
-          ))}
-        </Row>
-      </DragDropContext>
+                      <Card className="task-card mb-3 shadow-sm">
+                        <Card.Body>
+                          <div className="card-heading">
+                            <Card.Title>{card.title || "Untitled Task"}</Card.Title>
+                            <FaEye
+                              className="task-icon"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => navigate(`/task/${boardId}/${card._id}`)}
+                            />
+                          </div>
+                          <Card.Text>
+                            <small className="d-block mb-1">
+                              <strong>Assigned to: </strong>
+                              {card.assign_to?.email || "Unassigned"}
+                            </small>
+                            <small className="d-block">
+                              <strong>Due Date: </strong>
+                              {card.dueDate
+                                ? new Date(card.dueDate).toLocaleDateString(
+                                    undefined,
+                                    { year: "numeric", month: "short", day: "numeric" }
+                                  )
+                                : "No due date"}
+                            </small>
+                            {card.description && (
+                              <small className="d-block mt-2 text-muted description-text">
+                                {card.description.length > 100
+                                  ? `${card.description.substring(0, 100)}...`
+                                  : card.description}
+                              </small>
+                            )}
+                          </Card.Text>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+              <Button
+                variant="outline-secondary"
+                className="w-100 mt-2 add-card-btn"
+                onClick={handleAddCard}
+              >
+                + Add a card
+              </Button>
+            </div>
+          )}
+        </Droppable>
+      </Col>
+    ))}
+  </Row>
+</DragDropContext>
+
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
@@ -457,17 +471,23 @@ const Tasks = () => {
           </Form>
 
           {boardMembers.length > 0 && (
-            <div className="mt-4">
-              <h6>Current Board Members:</h6>
-              <ul className="list-unstyled">
-                {boardMembers.map((member) => (
-                  <li key={member.user_id} className="text-muted">
-                    {member.email || member.user_id}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+  <div className="mt-4">
+    <h6>Current Board Members:</h6>
+    <ul className="list-unstyled">
+      {boardMembers.map(member => {
+        const email = member?.email || "No Email Provided";
+        const userId = member?.user_id || "Unknown User";
+
+        return (
+          <li key={member._id || userId} className="text-muted">
+            {email} ({userId})
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}
+
         </Modal.Body>
       </Modal>
     </Container>
